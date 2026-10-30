@@ -262,10 +262,10 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
 /* revelar ao rolar (só onde o navegador suporta; sem suporte tudo fica visível) */
 @supports (animation-timeline: view()){
   @media (prefers-reduced-motion:no-preference){
-    .rv{animation:rv linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
-    @keyframes rv{from{opacity:.15;translate:0 50px;scale:.94}}
-    .rv-l{animation:rvl linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
-    @keyframes rvl{from{opacity:.15;translate:-60px 0;rotate:-6deg}}
+    .rv{animation:rv linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+    @keyframes rv{from{opacity:.5;translate:0 30px;scale:.97}}
+    .rv-l{animation:rvl linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+    @keyframes rvl{from{opacity:.6;translate:0 24px}}
   }
 }
 @media (prefers-reduced-motion:reduce){
@@ -279,6 +279,7 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
   .packs,.rules{grid-template-columns:1fr}
   .lambes{grid-template-columns:1fr 1fr}
   .gal{grid-template-columns:1fr 1fr;gap:18px}
+  section{padding-block:52px 28px}
   .pola.big{grid-row:auto}
   .pola.big .ph,.pola.big img{aspect-ratio:4/3;height:auto;min-height:0}
   .receipt{position:static}
