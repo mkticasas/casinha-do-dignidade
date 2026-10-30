@@ -225,6 +225,13 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .pola figcaption{font:400 19px/1 var(--marker);color:var(--paper-ink);padding:12px 4px 14px;text-align:center}
 .pola.big figcaption{font-size:24px}
 .gal-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:30px}
+.visita{margin-top:22px;display:grid;grid-template-columns:auto 1fr 1fr 1.2fr auto;gap:12px;align-items:end;background:var(--wall2);border:3px dashed var(--yellow);padding:18px}
+.visita-t{font:400 26px/1 var(--display);text-transform:uppercase;color:var(--yellow);align-self:center}
+.visita .btn{white-space:nowrap}
+.visita .btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.visita .note{grid-column:1/-1}
+@media (max-width:900px){.visita{grid-template-columns:1fr 1fr}.visita-t,.visita .btn,.visita label[for=vNome]{grid-column:1/-1}.visita .btn{justify-content:center}}
+@media (max-width:520px){.visita{grid-template-columns:1fr}}
 .gal-cta p{margin:0;font:400 20px var(--marker);color:var(--yellow);transform:rotate(-1deg)}
 
 /* regras */
@@ -460,7 +467,15 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
       <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da geladeira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da geladeira</span></div><figcaption>gelada do jeito certo</figcaption></figure>
       <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da piscina à noite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto à noite</span></div><figcaption>e quando escurece…</figcaption></figure>
     </div>
-    <div class="gal-cta"><a class="btn y" href="#orcamento">Quero essa casa</a><p>quer ver de perto? a gente marca uma visita</p></div>
+    <div class="gal-cta"><a class="btn y" href="#orcamento">Quero essa casa</a><p>quer ver de perto? marca uma visita</p></div>
+    <form class="visita" id="visita" novalidate>
+      <b class="visita-t">Agendar visita</b>
+      <label class="f" for="vDia">Dia<input type="date" id="vDia"></label>
+      <label class="f" for="vPer">Período<select id="vPer"><option>manhã</option><option selected>tarde</option><option>noite</option></select></label>
+      <label class="f" for="vNome">Seu nome<input type="text" id="vNome" autocomplete="name" placeholder="Como te chamamos"></label>
+      <a class="btn" id="vBtn" href="#" target="_blank" rel="noopener">Agendar no WhatsApp</a>
+      <p class="note" id="vInfo">A gente confirma o horário pelo WhatsApp.</p>
+    </form>
   </section>
 
   <section id="ajuda">
@@ -761,6 +776,24 @@ $("f").addEventListener("change",calc);
 $("f").addEventListener("submit",e=>e.preventDefault());
 calc();
 carregarPrecos();
+
+/* ---- agendar visita ---- */
+(function(){
+  const hoje=new Date();const iso=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const amanha=new Date();amanha.setDate(hoje.getDate()+1);
+  $("vDia").min=iso(hoje);$("vDia").value=iso(amanha);
+  function upd(){
+    const d=$("vDia").value,per=$("vPer").value,n=$("vNome").value.trim();
+    const ok=!!d;$("vBtn").setAttribute("aria-disabled",ok?"false":"true");
+    const dd=d?new Date(d+"T12:00:00"):null;
+    const txt=dd?`${dd.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}, de ${per}`:"";
+    $("vInfo").textContent=ok?`Visita: ${txt}. A gente confirma o horário pelo WhatsApp.`:"Escolha o dia da visita.";
+    const msg=[`Salve! Quero agendar uma visita na *Casinha do Dignidade*.`,n?`*Nome:* ${n}`:null,`*Dia:* ${txt}`].filter(Boolean).join("\n");
+    $("vBtn").href=`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+  }
+  $("visita").addEventListener("input",upd);$("visita").addEventListener("change",upd);
+  $("visita").addEventListener("submit",e=>e.preventDefault());upd();
+})();
 
 /* barra de progresso */
 const bar=$("prog");
