@@ -232,6 +232,11 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .rule{border-top:4px solid var(--yellow);padding-top:14px}
 .rule b{font:400 30px/1 var(--display);text-transform:uppercase;display:block;margin-bottom:6px}
 .rule p{margin:0;color:#D9D3C7}
+.feito{color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;transition:color .3s}
+.feito b{display:inline-flex;align-items:center;gap:5px;color:var(--chalk);font:800 15px var(--body);letter-spacing:-.02em}
+.feito .play{width:0;height:0;border-left:8px solid #C52F43;border-top:5px solid transparent;border-bottom:5px solid transparent;transition:transform .3s}
+.feito:hover{color:var(--chalk)}
+.feito:hover .play{transform:translateX(3px)}
 footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:14px}
 
 /* chamas e fumaça */
@@ -556,7 +561,7 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
   </section>
 
   <footer>
-    <span>Casinha do Dignidade · atendimento iMarcas</span>
+    <a class="feito" href="https://mkticasas.github.io/imarcas/" target="_blank" rel="noopener">Site desenvolvido por <b><span class="play" aria-hidden="true"></span>iMarcas</b> · Marcas reais para negócios locais</a>
     <span>WhatsApp (17) 99145-2199</span>
   </footer>
 </div>
