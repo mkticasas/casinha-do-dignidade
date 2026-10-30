@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Casa de festa em Rio Preto com piscina, churrasqueira e orçamento na hora pelo WhatsApp.">
+<meta property="og:title" content="Casinha do Dignidade">
+<meta property="og:image" content="logo-casinha.png">
+<link rel="icon" href="logo-casinha.png">
+<style>*,::before,::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Casinha do Dignidade</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap">
+<style>
+/* Layout: muro de quebrada — cartazes lambe-lambe colados, placa de oferta de açougue, nota de comanda. Visual único (escuro), por escolha. */
+:root{
+  --wall:#1A1A19; --wall2:#24231F; --paper:#F3E8CF; --paper-ink:#1A1712;
+  --yellow:#FFD23F; --grey:#B9B7B0; --grey-ink:#4E4D48; --green:#1FAE5B; --chalk:#F2EEE6; --muted:#A9A397; --tape:rgba(240,232,205,.78);
+  --display:"Anton", Impact, "Arial Narrow Bold", sans-serif;
+  --marker:"Permanent Marker", "Comic Sans MS", cursive;
+  --body:"Archivo", system-ui, -apple-system, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip;max-width:100%}
+html{scroll-behavior:smooth}
+.page{overflow-x:clip;width:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background-color:var(--wall);color:var(--chalk);font:16px/1.55 var(--body);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:.92;margin:0;letter-spacing:.005em;text-wrap:balance}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.eyebrow{font:400 20px/1 var(--marker);color:var(--yellow);transform:rotate(-2deg);display:inline-block}
+
+/* barra de progresso */
+.prog{position:fixed;inset:0 0 auto;height:calc(5px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);z-index:50;pointer-events:none}
+.prog i{display:block;height:5px;background:linear-gradient(90deg,var(--yellow),var(--grey));transform-origin:0 50%;transform:scaleX(0)}
+
+/* topo */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:20px;flex-wrap:wrap}
+.logo{font:800 22px/1 var(--body);letter-spacing:-.03em;display:inline-flex;align-items:flex-end;color:var(--chalk)}
+.logo .i{position:relative;display:inline-block}
+.logo .i svg{position:absolute;left:50%;top:-6px;transform:translateX(-45%);width:9px;height:10px}
+.pill{font:400 14px/1 var(--marker);background:var(--yellow);color:var(--paper-ink);padding:7px 12px;transform:rotate(2deg)}
+
+/* hero */
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:28px;align-items:center;padding-block:18px 56px}
+.hero h1{font-size:clamp(60px,11vw,150px);line-height:.86}
+.hero h1 span{display:block}
+.hero > div:first-child{container-type:inline-size;min-width:0}
+.hero h1.h1-2l{font-size:clamp(40px,19.5cqi,124px);margin-top:.22em;margin-bottom:.18em}
+.hero h1.h1-2l span{white-space:nowrap}
+.hero h1 .spray{color:var(--grey);position:relative;text-shadow:0 0 18px rgba(185,183,176,.25)}
+.hero h1 .spray::after{ /* escorrido de spray */
+  content:"";position:absolute;left:12%;right:30%;top:88%;height:44px;
+  background:
+    linear-gradient(var(--grey),var(--grey)) 4% 0/5px 70% no-repeat,
+    linear-gradient(var(--grey),var(--grey)) 31% 0/4px 45% no-repeat,
+    linear-gradient(var(--grey),var(--grey)) 58% 0/6px 100% no-repeat,
+    linear-gradient(var(--grey),var(--grey)) 88% 0/4px 60% no-repeat;
+  border-radius:0 0 4px 4px;opacity:.9}
+.hero p{max-width:44ch;font-size:18px;color:#D9D3C7;margin:30px 0 0}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font:800 16px/1 var(--body);text-transform:uppercase;letter-spacing:.02em;text-decoration:none;padding:16px 20px;border:3px solid var(--chalk);color:var(--chalk);background:transparent;cursor:pointer;box-shadow:5px 5px 0 var(--chalk);transition:transform .12s, box-shadow .12s}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--chalk)}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--chalk)}
+.btn.y{background:var(--yellow);color:var(--paper-ink);border-color:var(--paper-ink);box-shadow:5px 5px 0 var(--grey)}
+.btn.y:hover{box-shadow:7px 7px 0 var(--grey)}
+
+.hero-art{position:relative;justify-self:stretch;width:100%;max-width:420px;margin-inline:auto;aspect-ratio:6/5}
+.hero-art .house{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 14px 24px rgba(0,0,0,.55))}
+.top .brand{height:64px;width:auto;display:block}
+.hero-art.has-logo{aspect-ratio:4/3;max-width:540px}
+.hero-art.has-logo{margin-bottom:56px}
+.hero-art.has-logo .tag-price{top:auto;bottom:-70px;right:2%}
+.tag-price{position:absolute;right:-4px;top:4%;background:var(--yellow);color:var(--paper-ink);padding:12px 16px 10px;transform:rotate(8deg);box-shadow:0 8px 20px rgba(0,0,0,.45);text-align:center;font-family:var(--marker);line-height:1}
+.tag-price small{display:block;font:800 12px var(--body);text-transform:uppercase;letter-spacing:.06em}
+.tag-price b{font:400 44px var(--marker);color:var(--grey-ink)}
+.tag-price::before{content:"";position:absolute;left:50%;top:-10px;width:70px;height:22px;background:var(--tape);transform:translateX(-50%) rotate(-4deg)}
+
+/* faixa letreiro */
+.mq{overflow:hidden;padding-block:14px}
+.marquee{background:var(--yellow);color:var(--paper-ink);border-block:4px solid var(--paper-ink);overflow:hidden;transform:rotate(-1.6deg) scale(1.04);margin:10px 0 0;position:relative;z-index:2}
+.marquee .track{display:flex;width:max-content;animation:roll 22s linear infinite}
+.marquee span{font:400 30px/1 var(--display);text-transform:uppercase;padding:14px 22px;white-space:nowrap}
+.marquee span::after{content:"✸";color:var(--grey);margin-left:44px}
+@keyframes roll{to{transform:translateX(-50%)}}
+
+/* seções */
+section{padding-block:72px 40px}
+.sec-head{display:grid;gap:10px;margin-bottom:30px}
+.sec-head h2{font-size:clamp(44px,7vw,84px)}
+
+/* lambe-lambe: como funciona */
+.lambes{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.lambe{position:relative;background:var(--paper);color:var(--paper-ink);padding:28px 18px 20px;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.lambe:nth-child(1){transform:rotate(-2.5deg)} .lambe:nth-child(2){transform:rotate(1.8deg)}
+.lambe:nth-child(3){transform:rotate(-1deg)} .lambe:nth-child(4){transform:rotate(2.6deg)}
+.lambe::before{content:"";position:absolute;top:-11px;left:50%;width:84px;height:24px;background:var(--tape);transform:translateX(-50%) rotate(3deg)}
+.lambe .n{font:400 58px/1 var(--display);color:var(--grey-ink)}
+.lambe b{display:block;font:400 26px/1 var(--display);text-transform:uppercase;margin:6px 0 8px}
+.lambe p{margin:0;font-size:15px}
+
+/* pacotes: cartazes */
+.packs{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.pack{position:relative;background:var(--paper);color:var(--paper-ink);padding:22px 20px 24px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 26px rgba(0,0,0,.5);transition:transform .2s}
+.pack:nth-child(1){transform:rotate(-1.5deg)} .pack:nth-child(2){transform:rotate(1deg)} .pack:nth-child(3){transform:rotate(-.6deg)}
+.pack:hover{transform:rotate(0) translateY(-6px)}
+.pack .art{height:150px;display:grid;place-items:center;background:var(--wall2);border:3px solid var(--paper-ink)}
+.pack .art svg{height:126px;width:auto;max-width:100%}
+.pack h3{font-size:40px}
+.pack ul{margin:0;padding-left:18px;font-size:15px;display:grid;gap:3px}
+.pack .price{align-self:flex-start;background:var(--yellow);border:3px solid var(--paper-ink);padding:6px 12px 4px;transform:rotate(-3deg);font:400 30px/1 var(--marker);color:var(--grey-ink)}
+.pack .price small{font:800 11px var(--body);color:var(--paper-ink);text-transform:uppercase;display:block;letter-spacing:.06em}
+.pack.gold{outline:4px solid var(--yellow);outline-offset:6px}
+.stamp{position:absolute;top:14px;right:-6px;background:var(--grey-ink);color:#fff;font:400 18px/1 var(--display);text-transform:uppercase;padding:8px 12px;transform:rotate(9deg);box-shadow:0 4px 10px rgba(0,0,0,.4)}
+
+/* assistente */
+.helper{background:var(--wall2);border:3px dashed var(--yellow);padding:26px;display:grid;gap:18px;position:relative}
+.helper h3{font-size:40px;color:var(--yellow)}
+.hq{display:grid;gap:12px}
+.hq legend{font:400 22px/1.1 var(--marker);margin-bottom:6px;padding:0}
+.hq fieldset{border:0;padding:0;margin:0}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt span{display:inline-block;padding:12px 16px;border:3px solid var(--chalk);font:800 15px var(--body);text-transform:uppercase;cursor:pointer;transition:transform .12s}
+.opt input:checked + span{background:var(--yellow);color:var(--paper-ink);border-color:var(--yellow);transform:rotate(-2deg)}
+.opt input:focus-visible + span{outline:3px solid var(--grey);outline-offset:3px}
+.range-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.range-row input[type=range]{flex:1;min-width:160px;accent-color:var(--yellow)}
+.range-row output{font:400 44px/1 var(--display);color:var(--yellow);min-width:3ch;font-variant-numeric:tabular-nums}
+.helper .result{font:400 19px/1.35 var(--marker);color:var(--chalk)}
+.helper .result b,.note .v{color:var(--yellow);font-weight:400}
+.helper .result b{font-size:1.15em}
+.flash{animation:flash .6s ease}
+@keyframes flash{0%{background:var(--yellow);color:var(--paper-ink)}100%{background:transparent}}
+
+/* orçamento */
+.quote{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:start}
+.form{display:grid;gap:30px;min-width:0}
+fieldset.blk{border:0;margin:0;padding:0;display:grid;gap:12px;min-width:0}
+fieldset.blk > legend{font:400 32px/1 var(--display);text-transform:uppercase;margin-bottom:12px;padding:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.f{display:grid;gap:6px;font-size:14px;font-weight:600;min-width:0}
+input[type=date],input[type=number],input[type=text],select{font:inherit;color:var(--chalk);background:var(--wall2);border:2px solid #4A4740;padding:12px;width:100%;max-width:100%;min-width:0;border-radius:0}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-height:50px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
+input:focus,select:focus{border-color:var(--yellow);outline:none}
+.choice{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.choice label{position:relative;border:3px solid #4A4740;background:var(--wall2);padding:12px;cursor:pointer;display:grid;justify-items:center;text-align:center;gap:4px;transition:transform .15s,border-color .15s}
+.choice label svg{height:62px;width:auto}
+.choice input{position:absolute;opacity:0;width:1px;height:1px}
+.choice label:has(input:checked){border-color:var(--yellow);transform:rotate(-1.5deg) scale(1.03);background:#2E2B22}
+.choice label:has(input:focus-visible){outline:3px solid var(--grey);outline-offset:3px}
+.choice b{font:400 22px/1 var(--display);text-transform:uppercase}
+.choice small{color:var(--muted);font:400 15px var(--marker)}
+.items{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:10px 12px 10px 10px;background:var(--wall2);border:2px solid #3A3832;transition:border-color .15s, background .15s}
+.item.on{border-color:var(--yellow);background:#2C2A22}
+.item .thumb{width:64px;height:64px;background:var(--paper);display:grid;place-items:center;transform:rotate(-3deg);box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.item .thumb svg{width:54px;height:54px}
+.item.on .thumb{animation:wob .45s ease}
+@keyframes wob{30%{transform:rotate(6deg) scale(1.12)}70%{transform:rotate(-5deg) scale(1.04)}}
+.item .nm{font-weight:800;min-width:0}
+.item small{display:block;color:var(--yellow);font:400 15px var(--marker)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:38px;height:38px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);font:800 20px var(--body);cursor:pointer}
+.stepper button:hover{background:var(--chalk);color:var(--wall)}
+.stepper input{width:52px;text-align:center;padding:8px 2px;font-variant-numeric:tabular-nums;font-weight:800}
+.note{font-size:14px;color:var(--muted);margin:0}
+.umdia{display:inline-flex;align-items:center;gap:12px;cursor:pointer;justify-self:start;font:800 15px var(--body);text-transform:uppercase;letter-spacing:.02em}
+.umdia input{position:absolute;opacity:0;width:1px;height:1px}
+.umdia span::before{content:"";display:inline-block;width:26px;height:26px;margin-right:10px;vertical-align:-7px;border:3px solid var(--chalk);background:transparent;transition:background .15s}
+.umdia input:checked + span::before{background:var(--yellow) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10l4 4 8-9' fill='none' stroke='%231A1712' stroke-width='3'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--yellow)}
+.umdia input:focus-visible + span::before{outline:3px solid var(--grey);outline-offset:3px}
+.note b{color:var(--yellow);font-weight:600}
+.drinks{display:flex;gap:14px;align-items:center;background:var(--wall2);border:2px solid #3A3832;padding:14px}
+.drinks svg{width:64px;height:64px;flex:none}
+
+/* nota de comanda */
+.receipt{position:sticky;top:calc(env(safe-area-inset-top,0px) + 18px);background:var(--paper);color:var(--paper-ink);padding:22px 20px 30px;font-family:"Courier New",ui-monospace,monospace;box-shadow:0 14px 30px rgba(0,0,0,.55);transform:rotate(.8deg);
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 12px) no-repeat, conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/16px 12px repeat-x;
+          mask:linear-gradient(#000 0 0) top/100% calc(100% - 12px) no-repeat, conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/16px 12px repeat-x}
+.receipt h3{font:400 30px/1 var(--display);text-align:center}
+.receipt .sub{text-align:center;font-size:12px;margin:4px 0 14px;letter-spacing:.08em;text-transform:uppercase}
+.lines{display:grid;gap:5px;font-size:14px;font-variant-numeric:tabular-nums;border-top:2px dashed var(--paper-ink);padding-top:12px}
+.lines div{display:flex;justify-content:space-between;gap:10px;animation:pop .3s ease}
+@keyframes pop{from{transform:translateX(-6px);opacity:.3}}
+.lines .muted{opacity:.65}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:2px dashed var(--paper-ink);margin-top:12px;padding-top:12px}
+.total span{font:800 15px var(--body);text-transform:uppercase}
+.total b{font:400 40px/1 var(--marker);color:var(--grey-ink);font-variant-numeric:tabular-nums}
+.parc{font-size:13px;margin:6px 0 14px;text-align:right}
+.send{display:flex;justify-content:center;align-items:center;gap:10px;background:var(--green);color:#fff;text-decoration:none;font:800 16px var(--body);text-transform:uppercase;padding:16px;border:3px solid var(--paper-ink);box-shadow:4px 4px 0 var(--paper-ink);transition:transform .12s, box-shadow .12s}
+.send:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--paper-ink)}
+.send[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.fine{font-size:12px;margin:12px 0 0;font-family:var(--body)}
+.fine b{user-select:all}
+.err{color:var(--grey-ink);font:600 13px var(--body);margin:8px 0 0}
+
+/* galeria: polaroids colados no muro */
+.gal-lead{max-width:46ch;color:#D9D3C7;font-size:17px;margin:0}
+.gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(0,auto);gap:22px;margin-top:8px}
+.pola{position:relative;margin:0;background:var(--paper);padding:10px 10px 0;box-shadow:0 12px 26px rgba(0,0,0,.5);transition:transform .2s}
+.pola:nth-child(odd){transform:rotate(-1.6deg)} .pola:nth-child(even){transform:rotate(1.4deg)}
+.pola:hover{transform:rotate(0) scale(1.03);z-index:2}
+.pola::before{content:"";position:absolute;top:-10px;left:50%;width:80px;height:22px;background:var(--tape);transform:translateX(-50%) rotate(-3deg);z-index:1}
+.pola.big{grid-column:span 2;grid-row:span 2}
+.pola img{display:block}
+.pola .ph,.pola img{width:100%;aspect-ratio:4/3;max-width:100%;object-fit:cover}
+.pola.big .ph,.pola.big img{aspect-ratio:auto;height:calc(100% - 52px);min-height:260px}
+.ph{display:grid;place-items:center;align-content:center;gap:6px;text-align:center;color:var(--muted);
+  background:repeating-linear-gradient(-45deg,#2A2924 0 12px,#24231F 12px 24px);border:2px dashed #55524A}
+.ph svg{width:42px;height:42px}
+.ph span{font:800 12px var(--body);letter-spacing:.1em;text-transform:uppercase}
+.pola figcaption{font:400 19px/1 var(--marker);color:var(--paper-ink);padding:12px 4px 14px;text-align:center}
+.pola.big figcaption{font-size:24px}
+.gal-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:30px}
+.gal-cta p{margin:0;font:400 20px var(--marker);color:var(--yellow);transform:rotate(-1deg)}
+
+/* regras */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.rule{border-top:4px solid var(--yellow);padding-top:14px}
+.rule b{font:400 30px/1 var(--display);text-transform:uppercase;display:block;margin-bottom:6px}
+.rule p{margin:0;color:#D9D3C7}
+footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+
+/* chamas e fumaça */
+.flame{transform-origin:50% 100%;animation:flick .5s ease-in-out infinite alternate}
+.flame.b{animation-duration:.37s;animation-delay:-.2s}
+@keyframes flick{from{transform:scaleY(.82) skewX(-4deg)}to{transform:scaleY(1.08) skewX(4deg)}}
+.smoke{animation:smoke 3.2s ease-out infinite;opacity:0}
+.smoke.b{animation-delay:1.6s}
+@keyframes smoke{0%{transform:translateY(6px);opacity:0}30%{opacity:.6}100%{transform:translateY(-26px) scale(1.4);opacity:0}}
+.wave{animation:wave 2.6s ease-in-out infinite alternate}
+@keyframes wave{to{transform:translateX(-8px)}}
+.bob{animation:bob 3s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-8px) rotate(1deg)}}
+
+/* entrada da página */
+.hero h1 span{animation:slam .55s cubic-bezier(.2,1.6,.4,1) both}
+.hero h1 span:nth-child(2){animation-delay:.12s}
+.hero h1 span:nth-child(3){animation-delay:.24s}
+@keyframes slam{from{transform:scale(1.5) rotate(-4deg);opacity:0}}
+.tag-price{animation:drop .6s .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes drop{from{transform:translateY(-60px) rotate(30deg);opacity:0}}
+
+/* revelar ao rolar (só onde o navegador suporta; sem suporte tudo fica visível) */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .rv{animation:rv linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+    @keyframes rv{from{opacity:.15;translate:0 50px;scale:.94}}
+    .rv-l{animation:rvl linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+    @keyframes rvl{from{opacity:.15;translate:-60px 0;rotate:-6deg}}
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+@media (max-width:900px){
+  .hero,.quote{grid-template-columns:1fr}
+  .hero-art{max-width:340px}
+  .hero-art.has-logo{order:-1;max-width:420px}
+  .packs,.rules{grid-template-columns:1fr}
+  .lambes{grid-template-columns:1fr 1fr}
+  .gal{grid-template-columns:1fr 1fr;gap:18px}
+  .pola.big{grid-row:auto}
+  .pola.big .ph,.pola.big img{aspect-ratio:4/3;height:auto;min-height:0}
+  .receipt{position:static}
+}
+@media (max-width:520px){
+  .row,.lambes{grid-template-columns:1fr}
+  .choice{grid-template-columns:1fr}
+  .choice label{grid-template-columns:auto 1fr;justify-items:start;text-align:left;align-items:center}
+  .choice label svg{grid-row:span 2;height:52px}
+  .item{grid-template-columns:52px 1fr;}
+  .item .thumb{width:52px;height:52px}
+  .item .thumb svg{width:44px;height:44px}
+  .stepper{grid-column:1 / -1;justify-content:flex-end}
+  .marquee span{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<div class="prog" aria-hidden="true"><i id="prog"></i></div>
+<div class="page">
+
+<!-- ===== ilustrações reutilizáveis ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-casa" viewBox="0 0 120 100">
+      <rect x="6" y="80" width="108" height="16" fill="#3BA7C9" stroke="#111" stroke-width="3"/>
+      <path class="wave" d="M6 86 q9 -6 18 0 t18 0 t18 0 t18 0 t18 0 t18 0 t18 0" fill="none" stroke="#fff" stroke-width="2.5"/>
+      <path d="M18 80 V44 L60 14 L102 44 V80Z" fill="#F3E8CF" stroke="#111" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M10 48 L60 10 L110 48" fill="none" stroke="#8E8C86" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="48" y="54" width="24" height="26" fill="#FFD23F" stroke="#111" stroke-width="3"/>
+      <rect x="26" y="52" width="14" height="12" fill="#111"/>
+      <rect x="80" y="52" width="14" height="12" fill="#111"/>
+    </symbol>
+    <symbol id="i-brasa" viewBox="0 0 120 100">
+      <circle class="smoke" cx="52" cy="20" r="7" fill="#9A958A"/>
+      <circle class="smoke b" cx="68" cy="16" r="6" fill="#9A958A"/>
+      <path class="flame" d="M40 52 C34 40 44 34 46 24 C52 34 50 38 56 44 C60 36 60 30 58 24 C70 34 78 42 74 52Z" fill="#FF7A1A"/>
+      <path class="flame b" d="M48 52 C46 44 52 40 54 34 C58 42 62 44 64 52Z" fill="#FFD23F"/>
+      <rect x="20" y="52" width="80" height="10" fill="#111"/>
+      <path d="M24 56 H96" stroke="#8E8C86" stroke-width="3" stroke-dasharray="6 4"/>
+      <path d="M26 62 H94 L86 82 H34Z" fill="#3A3832" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M40 82 L32 96 M80 82 L88 96" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-gold" viewBox="0 0 120 100">
+      <path d="M22 48 L32 18 L48 36 L60 12 L72 36 L88 18 L98 48Z" fill="#FFD23F" stroke="#111" stroke-width="3.5" stroke-linejoin="round"/>
+      <circle cx="60" cy="12" r="5" fill="#8E8C86" stroke="#111" stroke-width="2.5"/>
+      <circle cx="32" cy="18" r="4" fill="#8E8C86" stroke="#111" stroke-width="2.5"/>
+      <circle cx="88" cy="18" r="4" fill="#8E8C86" stroke="#111" stroke-width="2.5"/>
+      <rect x="22" y="48" width="76" height="10" fill="#E6B91E" stroke="#111" stroke-width="3"/>
+      <path class="flame" d="M44 84 C40 76 46 72 48 66 C52 72 52 74 56 78 C58 72 58 70 58 66 C66 72 70 78 68 84Z" fill="#FF7A1A"/>
+      <rect x="30" y="84" width="60" height="8" fill="#111"/>
+      <path d="M78 64 L104 90" stroke="#C9C3B6" stroke-width="5" stroke-linecap="round"/>
+      <path d="M72 58 L82 68" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-picanha" viewBox="0 0 64 64">
+      <path d="M8 40 L32 10 L56 40 Z" fill="#C8443F" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M8 40 Q32 34 56 40 L56 48 Q32 42 8 48Z" fill="#FBF3E2" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M22 30 L30 20 M34 32 L42 24" stroke="#8E2A27" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="44" cy="52" r="3" fill="#fff" stroke="#111" stroke-width="1.5"/><circle cx="20" cy="54" r="2" fill="#fff" stroke="#111" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="i-contra" viewBox="0 0 64 64">
+      <path d="M10 30 C10 16 44 10 54 22 C62 32 52 50 34 52 C18 54 10 42 10 30Z" fill="#B83B37" stroke="#111" stroke-width="3"/>
+      <path d="M12 34 C14 46 26 52 36 51" fill="none" stroke="#FBF3E2" stroke-width="5" stroke-linecap="round"/>
+      <path d="M24 26 L40 22 M22 34 L44 30 M28 42 L44 38" stroke="#7F2522" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-fralda" viewBox="0 0 64 64">
+      <path d="M6 22 C20 14 44 14 58 24 L56 42 C42 34 22 34 8 42Z" fill="#B5403A" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M14 26 L16 36 M22 23 L24 34 M30 22 L32 33 M38 22 L40 34 M46 24 L48 36" stroke="#7F2522" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-linguica" viewBox="0 0 64 64">
+      <path d="M6 34 C6 26 16 24 20 30 C24 24 34 24 36 30 C40 24 50 24 52 30 C58 28 60 36 54 40 C50 44 42 42 40 38 C36 44 26 44 22 38 C18 44 6 42 6 34Z" fill="#C2553C" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M20 30 L22 38 M36 30 L38 38" stroke="#111" stroke-width="3"/>
+      <circle cx="12" cy="33" r="1.6" fill="#FBF3E2"/><circle cx="29" cy="33" r="1.6" fill="#FBF3E2"/><circle cx="45" cy="34" r="1.6" fill="#FBF3E2"/>
+    </symbol>
+    <symbol id="i-frango" viewBox="0 0 64 64">
+      <path d="M14 20 C26 6 50 16 44 34 C40 44 30 44 26 42 Z" fill="#D98A3C" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M26 42 L16 52" stroke="#FBF3E2" stroke-width="7" stroke-linecap="round"/>
+      <path d="M26 42 L16 52" stroke="#111" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0"/>
+      <circle cx="13" cy="52" r="4" fill="#FBF3E2" stroke="#111" stroke-width="2.5"/><circle cx="17" cy="56" r="4" fill="#FBF3E2" stroke="#111" stroke-width="2.5"/>
+      <path d="M24 22 L34 32" stroke="#A8642A" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-pao" viewBox="0 0 64 64">
+      <path d="M8 40 C4 30 46 14 56 22 C62 28 22 52 8 40Z" fill="#E7B66A" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M18 34 L24 30 M28 30 L34 26 M38 26 L44 22" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="22" cy="38" r="1.8" fill="#2F8A3B"/><circle cx="34" cy="33" r="1.8" fill="#2F8A3B"/><circle cx="44" cy="28" r="1.8" fill="#2F8A3B"/><circle cx="28" cy="35" r="1.4" fill="#2F8A3B"/>
+    </symbol>
+    <symbol id="i-queijo" viewBox="0 0 64 64">
+      <path d="M32 6 V60" stroke="#8B6B3E" stroke-width="4" stroke-linecap="round"/>
+      <rect x="20" y="16" width="24" height="30" rx="2" fill="#F6D27A" stroke="#111" stroke-width="3"/>
+      <path d="M22 24 L42 20 M22 32 L42 28 M22 40 L42 36" stroke="#8E5B1E" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-gela" viewBox="0 0 64 64">
+      <rect x="14" y="6" width="36" height="54" rx="3" fill="#F3E8CF" stroke="#111" stroke-width="3"/>
+      <path d="M14 24 H50" stroke="#111" stroke-width="3"/>
+      <path d="M44 12 V18 M44 30 V40" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+      <rect x="20" y="30" width="7" height="14" rx="2" fill="#FFD23F" stroke="#111" stroke-width="2"/>
+      <rect x="29" y="30" width="7" height="14" rx="2" fill="#8E8C86" stroke="#111" stroke-width="2"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <img class="brand" src="logo-casinha.png" alt="Casinha do Dignidade" width="69" height="52">
+    <span class="pill">prévia · valores de exemplo</span>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Rio Preto · casa de festa</p>
+      <h1 class="h1-2l" aria-label="Casinha do Dignidade. É só chegar e curtir"><span>É só chegar</span><span class="spray">e curtir</span></h1>
+      <p>Piscina limpa, churrasqueira acesa, geladeira cheia e a carne que você encomendou. Você só chega com a turma.</p>
+      <div class="ctas">
+        <a class="btn y" href="#ajuda">Me ajuda a montar</a>
+        <a class="btn" href="#orcamento">Quero montar sozinho</a>
+      </div>
+    </div>
+    <div class="hero-art has-logo">
+      <img class="house bob" src="logo-casinha.png" alt="Logo Casinha do Dignidade" width="1000" height="752">
+      <div class="tag-price"><small>diária a partir de</small><b>R$ 450</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="mq"><div class="marquee" aria-hidden="true"><div class="track">
+  <span>Chega e só curte</span><span>Piscina</span><span>Churrasqueira acesa</span><span>Até 40 pessoas</span><span>Carne na encomenda</span><span>Som na faixa</span><span>18x no cartão</span>
+  <span>Chega e só curte</span><span>Piscina</span><span>Churrasqueira acesa</span><span>Até 40 pessoas</span><span>Carne na encomenda</span><span>Som na faixa</span><span>18x no cartão</span>
+</div></div></div>
+
+<div class="wrap">
+  <section>
+    <div class="sec-head"><span class="eyebrow">sem enrolação</span><h2>Como funciona</h2></div>
+    <div class="lambes">
+      <div class="lambe rv"><div class="n">1</div><b>Monta o rolê</b><p>Data, quantas pessoas, pacote e as carnes. O preço aparece na hora.</p></div>
+      <div class="lambe rv"><div class="n">2</div><b>Manda no zap</b><p>O orçamento chega pra gente todo calculado. A gente confirma a data.</p></div>
+      <div class="lambe rv"><div class="n">3</div><b>Paga e assina</b><p>Pix com desconto ou cartão em até 18x. Depois do pagamento chega o termo pra assinar pelo celular.</p></div>
+      <div class="lambe rv"><div class="n">4</div><b>Só chega</b><p>Casa pronta, carne entregue e duas geladeiras: a da casa, abastecida, e uma livre pra tua bebida.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">escolhe o teu</span><h2>Três pacotes</h2></div>
+    <div class="packs">
+      <article class="pack rv">
+        <div class="art"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-casa"/></svg></div>
+        <h3>Casa</h3>
+        <ul><li>Casa inteira por 12 horas</li><li>Piscina e área gourmet</li><li>Caixa de som da casa</li><li>Você toca o churrasco</li></ul>
+        <div class="price"><small>só a diária</small>R$ 450+</div>
+      </article>
+      <article class="pack rv">
+        <div class="art"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-brasa"/></svg></div>
+        <h3>Brasa</h3>
+        <ul><li>Churrasqueira acesa quando você chegar</li><li>Carvão, gelo e utensílios</li><li>Geladeira abastecida</li></ul>
+        <div class="price"><small>diária +</small>R$ 250</div>
+      </article>
+      <article class="pack gold rv">
+        <span class="stamp">O mais pedido</span>
+        <div class="art"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-gold"/></svg></div>
+        <h3>Dignidade Gold</h3>
+        <ul><li>Tudo do Brasa</li><li>Churrasqueiro por até 6 horas</li><li>Carne servida na mesa</li></ul>
+        <div class="price"><small>diária +</small>R$ 750</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="fotos">
+    <div class="sec-head"><span class="eyebrow">chega mais</span><h2>Vem conhecer a quebrada</h2>
+      <p class="gal-lead">Foto real, sem filtro. O que você vê aqui é o que você encontra quando chegar.</p></div>
+    <!-- Para trocar: substitua cada <div class="ph">…</div> por <img src="foto.jpg" alt="descrição"> -->
+    <div class="gal">
+      <figure class="pola big rv"><div class="ph" role="img" aria-label="Espaço para foto da piscina"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da piscina</span></div><figcaption>a piscina te esperando</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da churrasqueira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da churrasqueira</span></div><figcaption>brasa no ponto</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da área gourmet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da área gourmet</span></div><figcaption>a mesa da resenha</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da fachada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da fachada</span></div><figcaption>chegou, é aqui</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto dos quartos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto dos quartos</span></div><figcaption>2 quartos, 2 banheiros</figcaption></figure>
+      <figure class="pola big rv"><div class="ph" role="img" aria-label="Espaço para foto da casa cheia numa festa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da casa lotada</span></div><figcaption>assim fica com 40 pessoas</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da geladeira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto da geladeira</span></div><figcaption>gelada do jeito certo</figcaption></figure>
+      <figure class="pola rv"><div class="ph" role="img" aria-label="Espaço para foto da piscina à noite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>foto à noite</span></div><figcaption>e quando escurece…</figcaption></figure>
+    </div>
+    <div class="gal-cta"><a class="btn y" href="#orcamento">Quero essa casa</a><p>quer ver de perto? a gente marca uma visita</p></div>
+  </section>
+
+  <section id="ajuda">
+    <div class="helper rv-l">
+      <span class="eyebrow">não sabe quanto pedir?</span>
+      <h3>Me ajuda a montar</h3>
+      <form class="hq" id="hq" novalidate>
+        <fieldset>
+          <legend>Quantas pessoas vão?</legend>
+          <div class="range-row"><input type="range" id="hPessoas" min="5" max="40" value="20" aria-label="Número de pessoas"><output id="hPessoasOut" for="hPessoas">20</output></div>
+        </fieldset>
+        <fieldset>
+          <legend>Quem vai assar?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="hAssa" value="casa" id="ha1"><span>A gente mesmo, do zero</span></label>
+            <label class="opt"><input type="radio" name="hAssa" value="brasa" id="ha2" checked><span>A gente, mas quero a brasa pronta</span></label>
+            <label class="opt"><input type="radio" name="hAssa" value="gold" id="ha3"><span>Quero um churrasqueiro</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Como tá a fome da turma?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="hFome" value="0.3" id="hf1"><span>Mais pra petisco</span></label>
+            <label class="opt"><input type="radio" name="hFome" value="0.4" id="hf2" checked><span>Na média</span></label>
+            <label class="opt"><input type="radio" name="hFome" value="0.5" id="hf3"><span>Larica braba</span></label>
+          </div>
+        </fieldset>
+        <p class="result" id="hRes"></p>
+        <div><button type="submit" class="btn y">Montar meu orçamento</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="orcamento">
+    <div class="sec-head"><span class="eyebrow">orçamento na hora</span><h2>Monta e vê o preço</h2></div>
+    <div class="quote">
+      <form class="form" id="f" novalidate>
+        <fieldset class="blk">
+          <legend>Datas e pessoas</legend>
+          <label class="umdia" for="umdia"><input type="checkbox" id="umdia" checked><span>Só um dia</span></label>
+          <div class="row">
+            <label class="f" for="data"><span id="lblData">Data da festa</span><input type="date" id="data" required></label>
+            <label class="f" for="dataSaida" id="boxSaida" hidden>Saída<input type="date" id="dataSaida"></label>
+          </div>
+          <label class="f" for="pessoas">Pessoas (até 40)<input type="number" id="pessoas" min="1" max="40" value="20" inputmode="numeric"></label>
+          <p class="note" id="diaInfo"></p>
+        </fieldset>
+
+        <fieldset class="blk">
+          <legend>Pacote</legend>
+          <div class="choice">
+            <label for="p1"><input type="radio" name="pacote" id="p1" value="casa"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-casa"/></svg><b>Casa</b><small>só a diária</small></label>
+            <label for="p2"><input type="radio" name="pacote" id="p2" value="brasa" checked><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-brasa"/></svg><b>Brasa</b><small>+ R$ 250</small></label>
+            <label for="p3"><input type="radio" name="pacote" id="p3" value="gold"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#i-gold"/></svg><b>Gold</b><small>+ R$ 750</small></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="blk">
+          <legend>Encomenda de carnes</legend>
+          <div class="items" id="carnes"></div>
+          <p class="note" id="carneInfo"></p>
+        </fieldset>
+
+        <fieldset class="blk">
+          <legend>Bebidas</legend>
+          <div class="drinks"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#i-gela"/></svg>
+            <p class="note" style="color:var(--chalk)">Tem duas geladeiras. Uma fica <b>livre pra você trazer a sua bebida</b>. A outra é da casa, sempre abastecida, e você paga só o que tirar dela, no fim da festa.</p></div>
+        </fieldset>
+
+        <fieldset class="blk">
+          <legend>Pagamento</legend>
+          <div class="row">
+            <label class="f" for="pag">Forma de pagamento<select id="pag"></select></label>
+            <label class="f" for="nome">Seu nome<input type="text" id="nome" autocomplete="name" placeholder="Como te chamamos"></label>
+          </div>
+        </fieldset>
+      </form>
+
+      <aside class="receipt" aria-live="polite">
+        <h3>Casinha do Dignidade</h3>
+        <p class="sub">comanda · orçamento</p>
+        <div class="lines" id="lines"></div>
+        <div class="total"><span>Total</span><b id="total">R$ 0</b></div>
+        <p class="parc" id="parc"></p>
+        <a class="send" id="send" href="#" target="_blank" rel="noopener">Mandar no WhatsApp</a>
+        <p class="err" id="err" hidden></p>
+        <p class="fine">Vai pro WhatsApp <b>(17) 99145-2199</b>. Se não abrir, chama nesse número. A data só fica reservada depois do pagamento. Aí você recebe o termo pra assinar.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">papo reto</span><h2>Regras da casa</h2></div>
+    <div class="rules">
+      <div class="rule rv"><b>Por diária</b><p>Cada dia vai das 10h às 22h. Mais de um dia? Paga uma diária por dia. Depois das 22h, som baixo por respeito aos vizinhos.</p></div>
+      <div class="rule rv"><b>Sobrou bebida?</b><p>O valor das bebidas que sobrarem volta pra você em até 2 dias.</p></div>
+      <div class="rule rv"><b>Até 40 pessoas</b><p>Passou disso, chama a gente antes de fechar.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Casinha do Dignidade · atendimento iMarcas</span>
+    <span>WhatsApp (17) 99145-2199</span>
+  </footer>
+</div>
+
+</div>
+<script>
+const WA="5517991452199";
+const PRECOS={semana:450,sexdom:650,sabado:850};
+const PACOTE={casa:{nome:"Casa",add:0},brasa:{nome:"Brasa",add:250},gold:{nome:"Dignidade Gold",add:750}};
+const LIMPEZA=150,JUROS=0.0299,PIX_DESC=0.05;
+/* Preços: enquanto SUPABASE_URL estiver vazio, valem os preços abaixo.
+   Quando o banco existir, o painel admin controla tudo (casinha_carnes / casinha_config). */
+const SUPABASE_URL="",SUPABASE_ANON_KEY="";
+let ACOUGUE="",PRECO_DATA="";
+let CARNES=[
+  {id:"picanha",nome:"Picanha",un:"peça (~1,2 kg)",curto:"peça",preco:110,kg:1.2,ic:"i-picanha"},
+  {id:"contra",nome:"Contrafilé",un:"kg",curto:"kg",preco:55,kg:1,ic:"i-contra"},
+  {id:"fralda",nome:"Fraldinha",un:"kg",curto:"kg",preco:50,kg:1,ic:"i-fralda"},
+  {id:"lingui",nome:"Linguiça toscana",un:"kg",curto:"kg",preco:28,kg:1,ic:"i-linguica"},
+  {id:"frango",nome:"Coxinha da asa",un:"kg",curto:"kg",preco:25,kg:1,ic:"i-frango"},
+  {id:"paoalho",nome:"Pão de alho",un:"pacote",curto:"pacote",preco:18,kg:0,ic:"i-pao"},
+  {id:"coalho",nome:"Queijo coalho",un:"pacote",curto:"pacote",preco:22,kg:0,ic:"i-queijo"}
+];
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const $=id=>document.getElementById(id);
+const PLURAL={"peça":"peças","pacote":"pacotes","kg":"kg"};
+const plural=(q,w)=>q>1?(PLURAL[w]||w):w;
+
+function rows(list,host,withIcon){
+  list.forEach(it=>{
+    const max=it.max??99;
+    host.insertAdjacentHTML("beforeend",
+      `<div class="item" id="row-${it.id}">${withIcon?`<div class="thumb"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#${it.ic}"/></svg></div>`:`<div class="thumb"><span style="font:400 26px var(--display);color:var(--grey-ink)">+</span></div>`}
+       <div class="nm">${it.nome}<small>${brl(it.preco)} / ${it.un}</small></div>
+       <div class="stepper"><button type="button" data-d="-1" data-for="${it.id}" aria-label="Menos ${it.nome}">−</button>
+       <input type="number" id="${it.id}" min="0" max="${max}" value="0" inputmode="numeric" aria-label="Quantidade de ${it.nome}">
+       <button type="button" data-d="1" data-for="${it.id}" aria-label="Mais ${it.nome}">+</button></div></div>`);
+  });
+}
+rows(CARNES,$("carnes"),true);
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function carregarPrecos(){
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
+  try{
+    const h={apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY};
+    const get=p=>fetch(SUPABASE_URL+"/rest/v1/"+p,{headers:h}).then(r=>r.ok?r.json():null).catch(()=>null);
+    const [cs,cf]=await Promise.all([get("casinha_carnes?select=*&ativo=eq.true&order=ordem"),get("casinha_config?id=eq.1&select=*")]);
+    if(cs&&cs.length){
+      CARNES=cs.map(c=>({id:c.slug,nome:c.nome,un:c.unidade_desc||c.unidade,curto:c.unidade==="peca"?"peça":c.unidade,preco:+c.preco_venda,kg:+c.peso_kg,ic:c.icone||"i-contra"}));
+      $("carnes").innerHTML="";rows(CARNES,$("carnes"),true);
+      const d=cs.map(c=>c.atualizado_em).sort().pop();
+      PRECO_DATA=d?new Date(d).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"";
+    }
+    if(cf&&cf[0]&&cf[0].acougue_nome) ACOUGUE=cf[0].acougue_nome;
+    calc();
+  }catch(e){}
+}
+
+const pag=$("pag");
+pag.insertAdjacentHTML("beforeend",`<option value="pix">Pix à vista (5% de desconto)</option><option value="1">Cartão 1x sem juros</option>`);
+for(let n=2;n<=18;n++) pag.insertAdjacentHTML("beforeend",`<option value="${n}">Cartão ${n}x (2,99% a.m.)</option>`);
+
+(function(){const d=new Date();d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
+  const iso=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  $("data").value=iso(d);$("data").min=iso(new Date());$("dataSaida").value=iso(d);$("dataSaida").min=iso(new Date());})();
+const isoD=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+function syncSaida(){
+  const um=$("umdia").checked,a=$("data").value;
+  $("boxSaida").hidden=um;$("lblData").textContent=um?"Data da festa":"Entrada";
+  if(a)$("dataSaida").min=a;
+  if(um||!a) {$("dataSaida").value=a;return;}
+  // ao abrir a saída, sugere o dia seguinte
+  if(!$("dataSaida").value||$("dataSaida").value<=a){const d=new Date(a+"T12:00:00");d.setDate(d.getDate()+1);$("dataSaida").value=isoD(d);}
+}
+$("data").addEventListener("change",()=>{syncSaida();calc();});
+$("umdia").addEventListener("change",()=>{syncSaida();calc();});
+
+const DIA=["dom","seg","ter","qua","qui","sex","sáb"];
+const DIA_LONGO=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+function valorDia(dw){return dw===6?PRECOS.sabado:(dw===5||dw===0)?PRECOS.sexdom:PRECOS.semana;}
+// período: cada dia entre a entrada e a saída (inclusive) é uma diária
+function periodo(){
+  const a=$("data").value; if(!a) return null;
+  const b=$("umdia").checked?a:($("dataSaida").value||a);
+  const d0=new Date(a+"T12:00:00"), d1=new Date(b+"T12:00:00");
+  if(d1<d0) return {erro:"a saída não pode ser antes da entrada"};
+  const dias=[];for(let d=new Date(d0);d<=d1;d.setDate(d.getDate()+1)){const dw=d.getDay();dias.push({dw,valor:valorDia(dw)});}
+  if(dias.length>7) return {erro:"o máximo é 7 diárias seguidas"};
+  const total=dias.reduce((s,x)=>s+x.valor,0);
+  const br=x=>x.split("-").reverse().slice(0,2).join("/");
+  return {dias,n:dias.length,total,ent:br(a),sai:br(b),dwIn:dias[0].dw,dwOut:dias[dias.length-1].dw};
+}
+
+// total animado
+let shown=0, raf=0;
+function tween(to){
+  cancelAnimationFrame(raf);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){shown=to;$("total").textContent=brl(to);return;}
+  const from=shown,t0=performance.now();
+  const step=t=>{const k=Math.min(1,(t-t0)/450),e=1-Math.pow(1-k,3);shown=from+(to-from)*e;$("total").textContent=brl(shown);if(k<1)raf=requestAnimationFrame(step);};
+  raf=requestAnimationFrame(step);
+}
+
+let lastLines="";
+function calc(){
+  const pac=document.querySelector('input[name="pacote"]:checked').value;
+  const pessoas=Math.max(0,+$("pessoas").value||0);
+  const per=periodo(); const d=per&&!per.erro?per:null;
+  $("diaInfo").innerHTML=!per?"Escolha a entrada pra ver o valor.":per.erro?`<b>${per.erro[0].toUpperCase()+per.erro.slice(1)}.</b>`:
+    (d.n===1?`1 diária (${DIA_LONGO[d.dwIn]}): <span class="v">${brl(d.total)}</span>`
+            :`${d.n} diárias: ${d.dias.map(x=>`${DIA[x.dw]} ${brl(x.valor).replace(",00","")}`).join(" + ")} = <span class="v">${brl(d.total)}</span>`)
+    +` · seg–qui R$ 450 · sex e dom R$ 650 · sáb R$ 850`;
+  const L=[];let sub=0;
+  const add=(r,v)=>{if(v>0){L.push([r,v]);sub+=v;}};
+  if(d) add(d.n===1?`Diária (${DIA_LONGO[d.dwIn]})`:`${d.n} diárias (${DIA[d.dwIn]} a ${DIA[d.dwOut]})`,d.total);
+  const nd=d?d.n:1;
+  add(nd>1?`Pacote ${PACOTE[pac].nome} × ${nd} dias`:`Pacote ${PACOTE[pac].nome}`,PACOTE[pac].add*nd);
+  add("Taxa de limpeza",LIMPEZA);
+  const carn=[];let kg=0;
+  CARNES.forEach(c=>{const q=+$(c.id).value||0;$("row-"+c.id).classList.toggle("on",q>0);
+    if(q){kg+=q*c.kg;carn.push(`${q} ${plural(q,c.curto)} de ${c.nome}`);add(`${q}× ${c.nome}`,q*c.preco);}});
+  const ref=(pessoas*0.4).toFixed(1).replace(".",",");
+  $("carneInfo").innerHTML=`Do açougue parceiro${ACOUGUE?` <b>${esc(ACOUGUE)}</b>`:""}, entregue na casa no dia.${PRECO_DATA?` Preços atualizados em <b>${PRECO_DATA}</b>.`:""} Referência: <b>400 g por pessoa = ${ref} kg</b>. Você pediu <b>${kg.toFixed(1).replace(".",",")} kg</b>.`;
+
+  let total=sub,parcTxt="";
+  const p=pag.value;
+  if(p==="pix"){const desc=sub*PIX_DESC;total=sub-desc;L.push(["Desconto Pix 5%",-desc]);parcTxt="Pix à vista";}
+  else{const n=+p;if(n===1)parcTxt=`1x de ${brl(sub)} no cartão`;else{const pmt=sub*JUROS/(1-Math.pow(1+JUROS,-n));total=pmt*n;parcTxt=`${n}x de ${brl(pmt)} no cartão`;}}
+
+  const html=L.map(([r,v])=>`<div><span>${r}</span><span>${v<0?"− "+brl(-v):brl(v)}</span></div>`).join("")
+    +`<div class="muted"><span>Geladeira da casa</span><span>o que consumir</span></div>`;
+  if(html!==lastLines){$("lines").innerHTML=html;lastLines=html;}
+  tween(total);
+  $("parc").textContent=parcTxt;
+
+  const errs=[];if(!per)errs.push("escolha a entrada");else if(per.erro)errs.push(per.erro);if(!pessoas)errs.push("informe quantas pessoas");if(pessoas>40)errs.push("o máximo é 40 pessoas");
+  $("err").hidden=!errs.length;$("err").textContent=errs.length?"Pra mandar: "+errs.join(" e ")+".":"";
+  $("send").setAttribute("aria-disabled",errs.length?"true":"false");
+
+  const nome=$("nome").value.trim();
+  const msg=[`Salve! Quero fechar a *Casinha do Dignidade*.`,``,
+    nome?`*Nome:* ${nome}`:null,
+    d&&d.n===1?`*Data:* ${d.ent} (${DIA[d.dwIn]})`:null,
+    d&&d.n>1?`*Entrada:* ${d.ent} (${DIA[d.dwIn]})`:null, d&&d.n>1?`*Saída:* ${d.sai} (${DIA[d.dwOut]})`:null, d&&d.n>1?`*Diárias:* ${d.n}`:null,
+    `*Pessoas:* ${pessoas}`,`*Pacote:* ${PACOTE[pac].nome}`,
+    carn.length?`*Carnes:* ${carn.join(", ")}`:`*Carnes:* sem encomenda`,
+    ``,
+    `*Total:* ${brl(total)}`,`*Pagamento:* ${parcTxt}`,
+    `(Bebidas que sobrarem: valor devolvido em até 2 dias. Tem geladeira livre pra minha bebida.)`
+  ].filter(x=>x!==null).join("\n");
+  $("send").href=`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+}
+
+/* ---- assistente "Me ajuda a montar" ---- */
+function sugestao(){
+  const p=+$("hPessoas").value, fome=+document.querySelector('input[name="hFome"]:checked').value;
+  const kg=p*fome;
+  const r={
+    picanha:Math.max(1,Math.round(kg*0.30/1.2)),
+    contra:Math.round(kg*0.20),
+    fralda:0,
+    lingui:Math.max(1,Math.round(kg*0.25)),
+    frango:Math.round(kg*0.25),
+    paoalho:Math.max(1,Math.ceil(p/8)),
+    coalho:Math.max(1,Math.ceil(p/10))
+  };
+  return {p,kg,r,pac:document.querySelector('input[name="hAssa"]:checked').value};
+}
+function previewHelper(){
+  const s=sugestao();$("hPessoasOut").textContent=s.p;
+  const nomes={picanha:["peça","peças","de picanha"],contra:["kg","kg","de contrafilé"],lingui:["kg","kg","de linguiça"],frango:["kg","kg","de coxinha da asa"],paoalho:["pacote","pacotes","de pão de alho"],coalho:["pacote","pacotes","de queijo coalho"]};
+  const parts=Object.entries(s.r).filter(([k,q])=>q>0&&nomes[k]).map(([k,q])=>`<b>${q} ${q>1?nomes[k][1]:nomes[k][0]}</b> ${nomes[k][2]}`);
+  const res=$("hRes");
+  res.innerHTML=`Pra <b>${s.p} pessoas</b>: uns <b>${s.kg.toFixed(1).replace(".",",")} kg</b> de carne. Sugestão: ${parts.join(", ")}. Pacote <b>${PACOTE[s.pac].nome}</b>.`;
+  res.querySelectorAll("b").forEach(el=>{el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");});
+}
+$("hq").addEventListener("input",previewHelper);
+$("hq").addEventListener("submit",e=>{
+  e.preventDefault();const s=sugestao();
+  $("pessoas").value=s.p;
+  document.querySelector(`input[name="pacote"][value="${s.pac}"]`).checked=true;
+  CARNES.forEach(c=>$(c.id).value=s.r[c.id]||0);
+  calc();
+  $("orcamento").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+});
+previewHelper();
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button[data-for]");if(!b)return;
+  const inp=$(b.dataset.for),max=+inp.max||99;
+  inp.value=Math.max(0,Math.min(max,(+inp.value||0)+ +b.dataset.d));calc();
+});
+$("f").addEventListener("input",calc);
+$("f").addEventListener("change",calc);
+$("f").addEventListener("submit",e=>e.preventDefault());
+calc();
+carregarPrecos();
+
+/* barra de progresso */
+const bar=$("prog");
+function prog(){const h=document.documentElement.scrollHeight-innerHeight;bar.style.transform=`scaleX(${h>0?Math.min(1,scrollY/h):0})`;}
+addEventListener("scroll",prog,{passive:true});addEventListener("resize",prog);prog();
+</script>
+
+</body>
+</html>

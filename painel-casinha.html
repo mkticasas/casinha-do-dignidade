@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="logo-casinha.png">
+<style>*,::before,::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Painel Casinha do Dignidade</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap">
+<style>
+/* Layout: painel de balcão — lista de cortes como fichas de açougue, barra de status fixa no topo. Mesmo muro escuro do site (visual único). */
+:root{
+  --wall:#1A1A19; --wall2:#24231F; --line:#3A3832; --paper:#F3E8CF; --ink:#1A1712;
+  --yellow:#FFD23F; --red:#C52F43; --green:#1FAE5B; --chalk:#F2EEE6; --muted:#A9A397;
+  --display:"Anton", Impact, "Arial Narrow Bold", sans-serif;
+  --marker:"Permanent Marker", "Comic Sans MS", cursive;
+  --body:"Archivo", system-ui, -apple-system, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{background:var(--wall);color:var(--chalk);font:15px/1.5 var(--body)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 60px}
+h1,h2{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:.95;margin:0}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--wall)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--wall);border-bottom:2px dashed var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:14px;flex-wrap:wrap}
+.bar h1{font-size:28px}.bar h1 small{display:block;font:400 15px var(--marker);color:var(--yellow);text-transform:none}
+.mode{font:800 11px var(--body);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border:2px solid var(--yellow);color:var(--yellow)}
+.mode.live{border-color:var(--green);color:var(--green)}
+section{margin-top:28px;display:grid;gap:14px}
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sec-title h2{font-size:34px}
+.sec-title p{margin:0;color:var(--muted);font-size:13px}
+.btn{font:800 14px var(--body);text-transform:uppercase;letter-spacing:.02em;padding:12px 16px;border:3px solid var(--chalk);background:transparent;color:var(--chalk);cursor:pointer;box-shadow:4px 4px 0 var(--chalk)}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--chalk)}
+.btn.y{background:var(--yellow);color:var(--ink);border-color:var(--ink);box-shadow:4px 4px 0 var(--red)}
+.btn.sm{padding:8px 12px;font-size:12px;box-shadow:3px 3px 0 currentColor}
+.btn:disabled{opacity:.4;pointer-events:none}
+[hidden]{display:none!important}
+label{display:grid;gap:5px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+input,select{font:600 15px var(--body);color:var(--chalk);background:var(--wall2);border:2px solid var(--line);padding:10px;width:100%;min-width:0;border-radius:0}
+input:focus,select:focus{border-color:var(--yellow);outline:none}
+input[type=number]{font-variant-numeric:tabular-nums}
+.ficha{background:var(--wall2);border:2px solid var(--line);padding:14px;display:grid;gap:12px;transition:border-color .15s}
+.ficha.dirty{border-color:var(--yellow)}
+.ficha.off{opacity:.55}
+.ficha-top{display:flex;align-items:center;gap:10px}
+.ficha-top input.nome{font:400 22px var(--display);text-transform:uppercase;background:transparent;border-color:transparent;padding:4px 6px}
+.ficha-top input.nome:focus{border-color:var(--yellow)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.venda{display:grid;align-content:end;gap:2px}
+.venda small{font-size:12px;font-weight:600;color:var(--muted)}
+.venda b{font:400 26px/1 var(--marker);color:var(--yellow);font-variant-numeric:tabular-nums}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--chalk);cursor:pointer}
+.toggle input{width:20px;height:20px;accent-color:var(--green)}
+.acoes{display:flex;gap:8px;flex-wrap:wrap}
+.del{color:var(--red);border-color:var(--red)}
+.acougue{background:var(--paper);color:var(--ink);padding:16px;display:grid;gap:12px;box-shadow:0 10px 24px rgba(0,0,0,.45);transform:rotate(-.4deg)}
+.acougue label{color:#5a5242}
+.acougue input{background:#fff;color:var(--ink);border-color:#cfc3a6}
+.acougue .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note b{color:var(--yellow);font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--green);color:#fff;font:800 14px var(--body);padding:12px 18px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .25s;z-index:20}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+.login{max-width:380px;margin:60px auto;display:grid;gap:14px;background:var(--wall2);border:3px dashed var(--yellow);padding:24px}
+.login h2{font-size:34px;color:var(--yellow)}
+@media (max-width:640px){
+  .grid{grid-template-columns:1fr 1fr}
+  .acougue .row{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="login" class="login" hidden>
+    <h2>Painel da Casinha</h2>
+    <p class="note">Entre com o mesmo e-mail e senha do painel da iMarcas.</p>
+    <label for="lEmail">E-mail<input id="lEmail" type="email" autocomplete="username"></label>
+    <label for="lPass">Senha<input id="lPass" type="password" autocomplete="current-password"></label>
+    <button class="btn y" id="lBtn" type="button">Entrar</button>
+    <p class="note" id="lErr" hidden></p>
+  </div>
+
+  <div id="app">
+    <header class="bar">
+      <h1>Casinha do Dignidade<small>painel de preços</small></h1>
+      <span class="mode" id="mode">Modo demonstração</span>
+    </header>
+
+    <section aria-labelledby="t-carnes">
+      <div class="sec-title"><h2 id="t-carnes">Carnes</h2><p id="lastUpd"></p></div>
+      <p class="note">Digite o <b>preço do açougue</b>. Se quiser margem, coloque a porcentagem. O site mostra o <b>preço de venda</b>.</p>
+      <div id="lista" class="lista" style="display:grid;gap:12px"></div>
+      <div><button class="btn" id="add" type="button">+ Adicionar corte</button></div>
+    </section>
+
+    <section aria-labelledby="t-acougue">
+      <div class="sec-title"><h2 id="t-acougue">Açougue parceiro</h2><p>aparece no site quando preenchido</p></div>
+      <div class="acougue">
+        <div class="row">
+          <label for="aNome">Nome<input id="aNome" type="text" placeholder="a confirmar"></label>
+          <label for="aEnd">Endereço<input id="aEnd" type="text" placeholder="a confirmar"></label>
+          <label for="aZap">WhatsApp<input id="aZap" type="text" inputmode="tel" placeholder="a confirmar"></label>
+        </div>
+        <div><button class="btn y sm" id="aSave" type="button">Salvar açougue</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== CONFIGURAÇÃO =====
+   Modo demonstração: SUPABASE_URL vazio -> dados ficam neste navegador.
+   Para ligar no banco: preencha as duas linhas abaixo (projeto Supabase da Casinha). */
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
+/* ======================= */
+
+const $=id=>document.getElementById(id);
+const brl=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const UN={kg:"kg",peca:"peça",pacote:"pacote"};
+const venda=(c,m)=>Math.round((+c||0)*(1+(m===""||m==null?0:+m)/100)*100)/100;
+const fmtData=d=>d?new Date(d).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
+function toast(msg,err){const t=$("toast");t.textContent=msg;t.classList.toggle("err",!!err);t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2200)}
+
+const SEED=[
+ {slug:"picanha",nome:"Picanha",unidade:"peca",unidade_desc:"peça (~1,2 kg)",peso_kg:1.2,preco_custo:110,margem_pct:null,ativo:true,ordem:1},
+ {slug:"contra",nome:"Contrafilé",unidade:"kg",unidade_desc:"kg",peso_kg:1,preco_custo:55,margem_pct:null,ativo:true,ordem:2},
+ {slug:"fralda",nome:"Fraldinha",unidade:"kg",unidade_desc:"kg",peso_kg:1,preco_custo:50,margem_pct:null,ativo:true,ordem:3},
+ {slug:"lingui",nome:"Linguiça toscana",unidade:"kg",unidade_desc:"kg",peso_kg:1,preco_custo:28,margem_pct:null,ativo:true,ordem:4},
+ {slug:"frango",nome:"Coxinha da asa",unidade:"kg",unidade_desc:"kg",peso_kg:1,preco_custo:25,margem_pct:null,ativo:true,ordem:5},
+ {slug:"paoalho",nome:"Pão de alho",unidade:"pacote",unidade_desc:"pacote",peso_kg:0,preco_custo:18,margem_pct:null,ativo:true,ordem:6},
+ {slug:"coalho",nome:"Queijo coalho",unidade:"pacote",unidade_desc:"pacote",peso_kg:0,preco_custo:22,margem_pct:null,ativo:true,ordem:7}
+];
+
+/* ---- camada de dados: navegador (demo) ou Supabase ---- */
+const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
+let token=null;
+const store={
+  get(k,d){try{const v=localStorage.getItem("casinha_"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("casinha_"+k,JSON.stringify(v))}catch(e){}}
+};
+async function api(path,opt={}){
+  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...opt,headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+(token||SUPABASE_ANON_KEY),"Content-Type":"application/json",Prefer:"return=representation",...(opt.headers||{})}});
+  if(!r.ok) throw new Error((await r.text())||r.status);
+  return r.status===204?null:r.json();
+}
+const DB={
+  async carnes(){ if(!LIVE){return store.get("carnes",SEED.map(x=>({...x,id:x.slug,atualizado_em:new Date().toISOString()})))}
+    return api("casinha_carnes?select=*&order=ordem")},
+  async salvarCarne(c){ c.atualizado_em=new Date().toISOString();
+    if(!LIVE){const l=await DB.carnes();const i=l.findIndex(x=>x.id===c.id);if(i<0)l.push(c);else l[i]=c;store.set("carnes",l);return c}
+    const body={slug:c.slug,nome:c.nome,unidade:c.unidade,unidade_desc:c.unidade_desc,peso_kg:c.peso_kg,preco_custo:c.preco_custo,margem_pct:c.margem_pct,ativo:c.ativo,ordem:c.ordem};
+    const r=c.id&&!String(c.id).startsWith("novo")?await api("casinha_carnes?id=eq."+c.id,{method:"PATCH",body:JSON.stringify(body)}):await api("casinha_carnes",{method:"POST",body:JSON.stringify(body)});
+    return r[0]},
+  async excluirCarne(id){ if(!LIVE){store.set("carnes",(await DB.carnes()).filter(x=>x.id!==id));return}
+    await api("casinha_carnes?id=eq."+id,{method:"DELETE"})},
+  async config(){ if(!LIVE) return store.get("config",{acougue_nome:"",acougue_endereco:"",acougue_whatsapp:""});
+    return (await api("casinha_config?id=eq.1&select=*"))[0]||{}},
+  async salvarConfig(c){ if(!LIVE){store.set("config",c);return}
+    await api("casinha_config?id=eq.1",{method:"PATCH",body:JSON.stringify(c)})}
+};
+async function login(email,pass){
+  const r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password:pass})});
+  if(!r.ok) throw new Error("E-mail ou senha não conferem.");
+  token=(await r.json()).access_token;
+}
+
+/* ---- tela ---- */
+let carnes=[];
+const slugify=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"item";
+function ficha(c){
+  const el=document.createElement("article");el.className="ficha"+(c.ativo?"":" off");el.dataset.id=c.id;
+  const id=s=>`${s}-${c.id}`;
+  el.innerHTML=`
+   <div class="ficha-top"><label class="sr" for="${id("nome")}" style="position:absolute;left:-9999px">Nome do corte</label>
+     <input class="nome" id="${id("nome")}" value="${(c.nome||"").replace(/"/g,"&quot;")}" placeholder="Nome do corte"></div>
+   <div class="grid">
+     <label for="${id("un")}">Vende por<select id="${id("un")}">${Object.entries(UN).map(([k,v])=>`<option value="${k}"${c.unidade===k?" selected":""}>${v}</option>`).join("")}</select></label>
+     <label for="${id("custo")}">Preço do açougue (R$)<input id="${id("custo")}" type="number" step="0.01" min="0" inputmode="decimal" value="${c.preco_custo??""}"></label>
+     <label for="${id("marg")}">Margem (%)<input id="${id("marg")}" type="number" step="0.5" min="0" inputmode="decimal" placeholder="sem margem" value="${c.margem_pct??""}"></label>
+     <div class="venda"><small>Preço no site</small><b id="${id("venda")}">${brl(venda(c.preco_custo,c.margem_pct))}</b></div>
+     <label for="${id("peso")}" class="peso"${c.unidade==="peca"?"":" hidden"}>Peso da peça (kg)<input id="${id("peso")}" type="number" step="0.1" min="0" inputmode="decimal" value="${c.peso_kg||""}"></label>
+   </div>
+   <div class="foot">
+     <label class="toggle" for="${id("ativo")}"><input type="checkbox" id="${id("ativo")}"${c.ativo?" checked":""}> Aparece no site</label>
+     <span>atualizado ${fmtData(c.atualizado_em)}</span>
+     <div class="acoes"><button class="btn sm del" type="button" data-act="del">Excluir</button><button class="btn y sm" type="button" data-act="save">Salvar</button></div>
+   </div>`;
+  const read=()=>({...c,nome:$(id("nome")).value.trim(),unidade:$(id("un")).value,preco_custo:+$(id("custo")).value||0,
+    margem_pct:$(id("marg")).value===""?null:+$(id("marg")).value,ativo:$(id("ativo")).checked,
+    peso_kg:$(id("un")).value==="peca"?(+$(id("peso")).value||0):($(id("un")).value==="kg"?1:0)});
+  el.addEventListener("input",()=>{const v=read();$(id("venda")).textContent=brl(venda(v.preco_custo,v.margem_pct));
+    el.querySelector(".peso").hidden=v.unidade!=="peca";el.classList.add("dirty");el.classList.toggle("off",!v.ativo)});
+  el.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.act==="save"){const v=read();if(!v.nome){toast("Dê um nome ao corte.",true);return}
+      v.slug=c.slug||slugify(v.nome);v.unidade_desc=v.unidade==="peca"?`peça (~${String(v.peso_kg).replace(".",",")} kg)`:UN[v.unidade];
+      b.disabled=true;try{const s=await DB.salvarCarne(v);Object.assign(c,s);el.replaceWith(ficha(c));toast(`${v.nome} salvo`);await carregar()}catch(err){toast("Não salvou: "+err.message,true)}b.disabled=false}
+    if(b.dataset.act==="del"){
+      if(b.dataset.confirm!=="1"){b.dataset.confirm="1";b.textContent="Confirmar exclusão";setTimeout(()=>{b.dataset.confirm="";b.textContent="Excluir"},3000);return}
+      try{if(!String(c.id).startsWith("novo"))await DB.excluirCarne(c.id);toast(`${c.nome||"Corte"} excluído`);await carregar()}catch(err){toast("Não excluiu: "+err.message,true)}}
+  });
+  return el;
+}
+async function carregar(){
+  carnes=await DB.carnes();
+  const l=$("lista");l.innerHTML="";carnes.sort((a,b)=>a.ordem-b.ordem).forEach(c=>l.appendChild(ficha(c)));
+  const ult=carnes.map(c=>c.atualizado_em).sort().pop();$("lastUpd").textContent="última atualização: "+fmtData(ult);
+  const cfg=await DB.config();$("aNome").value=cfg.acougue_nome||"";$("aEnd").value=cfg.acougue_endereco||"";$("aZap").value=cfg.acougue_whatsapp||"";
+}
+$("add").addEventListener("click",()=>{const c={id:"novo-"+Date.now(),nome:"",unidade:"kg",preco_custo:"",margem_pct:null,peso_kg:1,ativo:true,ordem:(carnes.length+1),atualizado_em:null};
+  carnes.push(c);const f=ficha(c);f.classList.add("dirty");$("lista").appendChild(f);f.querySelector("input.nome").focus()});
+$("aSave").addEventListener("click",async()=>{try{await DB.salvarConfig({acougue_nome:$("aNome").value.trim(),acougue_endereco:$("aEnd").value.trim(),acougue_whatsapp:$("aZap").value.trim()});toast("Açougue salvo")}catch(e){toast("Não salvou: "+e.message,true)}});
+
+async function iniciar(){
+  if(LIVE){$("mode").textContent="Conectado";$("mode").classList.add("live");$("app").hidden=true;$("login").hidden=false;
+    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);$("login").hidden=true;$("app").hidden=false;await carregar()}catch(e){$("lErr").hidden=false;$("lErr").textContent=e.message}};
+  } else await carregar();
+}
+iniciar();
+</script>
+
+</body>
+</html>
