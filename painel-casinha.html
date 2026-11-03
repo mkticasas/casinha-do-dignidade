@@ -70,6 +70,32 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .acougue .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .note{font-size:13px;color:var(--muted);margin:0}
 .note b{color:var(--yellow);font-weight:600}
+/* agenda */
+.cal{background:var(--wall2);border:2px solid var(--line);padding:14px;display:grid;gap:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cal-head b{font:400 24px var(--display);text-transform:uppercase}
+.cal-head button{width:42px;height:42px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);font:800 20px var(--body);cursor:pointer}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-grid .dw{font:800 11px var(--body);text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:4px}
+.cal-grid button{aspect-ratio:1;max-width:100%;border:1px solid var(--line);background:transparent;color:var(--chalk);font:700 15px var(--body);cursor:pointer;display:grid;place-items:center;padding:0;font-variant-numeric:tabular-nums}
+.cal-grid button:hover{border-color:var(--yellow)}
+.cal-grid button.passado{opacity:.35;cursor:default}
+.cal-grid button.hoje{outline:2px solid var(--chalk);outline-offset:-3px}
+.cal-grid button.c{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.cal-grid button.p{background:repeating-linear-gradient(-45deg,rgba(255,210,63,.45) 0 6px,transparent 6px 12px);border:2px dashed var(--yellow)}
+.cal-leg{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.lg::before{content:"";display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+.lg.c::before{background:var(--yellow)} .lg.p::before{border:2px dashed var(--yellow)}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rlist{display:grid;gap:8px}
+.ritem{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--wall2);border:2px solid var(--line);padding:12px;border-left:6px solid var(--yellow)}
+.ritem.pre{border-left-style:dashed}
+.ritem b{font:400 20px var(--display);text-transform:uppercase}
+.ritem small{display:block;color:var(--muted);font-size:13px}
+.pill{font:800 11px var(--body);text-transform:uppercase;letter-spacing:.06em;padding:4px 8px;background:var(--yellow);color:var(--ink)}
+.pill.pre{background:transparent;color:var(--yellow);border:2px dashed var(--yellow)}
+.ritem .acoes{grid-column:1/-1}
+@media (max-width:640px){.rgrid{grid-template-columns:1fr 1fr}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--green);color:#fff;font:800 14px var(--body);padding:12px 18px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .25s;z-index:20}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .toast.err{background:var(--red)}
@@ -99,6 +125,28 @@ input[type=number]{font-variant-numeric:tabular-nums}
       <h1>Casinha do Dignidade<small>painel de preços</small></h1>
       <span class="mode" id="mode">Modo demonstração</span>
     </header>
+
+    <section aria-labelledby="t-agenda">
+      <div class="sec-title"><h2 id="t-agenda">Agenda</h2><p>dia reservado fica bloqueado no site</p></div>
+      <div class="cal">
+        <div class="cal-head"><button type="button" id="calPrev" aria-label="Mês anterior">‹</button><b id="calMes"></b><button type="button" id="calNext" aria-label="Próximo mês">›</button></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-leg"><span class="lg c">confirmada</span><span class="lg p">pré-reserva</span><span>toque num dia livre pra preencher a reserva</span></div>
+      </div>
+      <form class="ficha" id="rForm" novalidate>
+        <div class="ficha-top"><b style="font:400 22px var(--display);text-transform:uppercase">Nova reserva</b></div>
+        <div class="rgrid">
+          <label for="rIn">Entrada<input type="date" id="rIn" required></label>
+          <label for="rOut">Saída<input type="date" id="rOut" required></label>
+          <label for="rStatus">Situação<select id="rStatus"><option value="confirmada">Confirmada (pagou)</option><option value="pre">Pré-reserva (segurando)</option></select></label>
+          <label for="rNome">Cliente<input type="text" id="rNome" placeholder="Nome"></label>
+          <label for="rZap">WhatsApp<input type="text" id="rZap" inputmode="tel" placeholder="(17) 9…"></label>
+          <label for="rValor">Valor (R$)<input type="number" id="rValor" step="0.01" min="0" inputmode="decimal"></label>
+        </div>
+        <div class="foot"><span id="rInfo"></span><button class="btn y sm" type="submit" id="rSave">Reservar e bloquear</button></div>
+      </form>
+      <div class="rlist" id="rLista"></div>
+    </section>
 
     <section aria-labelledby="t-carnes">
       <div class="sec-title"><h2 id="t-carnes">Carnes</h2><p id="lastUpd"></p></div>
@@ -171,6 +219,17 @@ const DB={
     await api("casinha_carnes?id=eq."+id,{method:"DELETE"})},
   async config(){ if(!LIVE) return store.get("config",{acougue_nome:"",acougue_endereco:"",acougue_whatsapp:""});
     return (await api("casinha_config?id=eq.1&select=*"))[0]||{}},
+  async reservas(){ if(!LIVE) return store.get("reservas",[]);
+    return api("casinha_reservas?select=*&order=entrada")},
+  async salvarReserva(r){
+    const body={entrada:r.entrada,saida:r.saida,nome:r.nome||null,whatsapp:r.whatsapp||null,valor:r.valor??null,status:r.status,obs:r.obs||null};
+    if(!LIVE){const l=await DB.reservas();
+      if(r.status!=="cancelada"&&l.some(x=>x.id!==r.id&&x.status!=="cancelada"&&!(r.saida<x.entrada||r.entrada>x.saida))) throw new Error("já tem reserva ativa nesses dias");
+      const i=l.findIndex(x=>x.id===r.id); if(i<0){r.id="r"+Date.now();l.push({...body,id:r.id})} else l[i]={...l[i],...body}; store.set("reservas",l); return r}
+    try{ return r.id? (await api("casinha_reservas?id=eq."+r.id,{method:"PATCH",body:JSON.stringify(body)}))[0] : (await api("casinha_reservas",{method:"POST",body:JSON.stringify(body)}))[0] }
+    catch(e){ if(/sobreposicao|23P01/.test(e.message)) throw new Error("já tem reserva ativa nesses dias"); throw e }},
+  async excluirReserva(id){ if(!LIVE){store.set("reservas",(await DB.reservas()).filter(x=>x.id!==id));return}
+    await api("casinha_reservas?id=eq."+id,{method:"DELETE"})},
   async salvarConfig(c){ if(!LIVE){store.set("config",c);return}
     await api("casinha_config?id=eq.1",{method:"PATCH",body:JSON.stringify(c)})}
 };
@@ -226,10 +285,57 @@ $("add").addEventListener("click",()=>{const c={id:"novo-"+Date.now(),nome:"",un
   carnes.push(c);const f=ficha(c);f.classList.add("dirty");$("lista").appendChild(f);f.querySelector("input.nome").focus()});
 $("aSave").addEventListener("click",async()=>{try{await DB.salvarConfig({acougue_nome:$("aNome").value.trim(),acougue_endereco:$("aEnd").value.trim(),acougue_whatsapp:$("aZap").value.trim()});toast("Açougue salvo")}catch(e){toast("Não salvou: "+e.message,true)}});
 
+/* ---- agenda ---- */
+let reservas=[],calRef=new Date();calRef.setDate(1);
+const isoL=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const brD=s=>s.split("-").reverse().slice(0,2).join("/");
+const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+function statusDia(iso){const r=reservas.find(x=>x.status!=="cancelada"&&iso>=x.entrada&&iso<=x.saida);return r?r.status==="pre"?"p":"c":""}
+function desenharCal(){
+  const y=calRef.getFullYear(),m=calRef.getMonth();$("calMes").textContent=`${MESES[m]} ${y}`;
+  const g=$("calGrid");g.innerHTML=["D","S","T","Q","Q","S","S"].map(d=>`<span class="dw">${d}</span>`).join("");
+  const pad=new Date(y,m,1).getDay();for(let i=0;i<pad;i++)g.insertAdjacentHTML("beforeend","<span></span>");
+  const hoje=isoL(new Date()),n=new Date(y,m+1,0).getDate();
+  for(let d=1;d<=n;d++){const iso=isoL(new Date(y,m,d,12));const st=statusDia(iso);
+    const r=reservas.find(x=>x.status!=="cancelada"&&iso>=x.entrada&&iso<=x.saida);
+    g.insertAdjacentHTML("beforeend",`<button type="button" data-d="${iso}" class="${st}${iso<hoje?" passado":""}${iso===hoje?" hoje":""}" aria-label="${d} de ${MESES[m]}${r?" — reservado"+(r.nome?" por "+r.nome:""):""}" title="${r?(r.nome||"reservado"):""}">${d}</button>`)}
+}
+$("calGrid").addEventListener("click",e=>{const b=e.target.closest("button[data-d]");if(!b||b.classList.contains("passado"))return;
+  if(statusDia(b.dataset.d)){toast("Esse dia já está reservado",true);return}
+  $("rIn").value=b.dataset.d;$("rOut").value=b.dataset.d;$("rNome").focus();rInfo()});
+$("calPrev").onclick=()=>{calRef.setMonth(calRef.getMonth()-1);desenharCal()};
+$("calNext").onclick=()=>{calRef.setMonth(calRef.getMonth()+1);desenharCal()};
+function rInfo(){const a=$("rIn").value,b=$("rOut").value;if(!a){$("rInfo").textContent="";return}
+  if(b&&b<a){$("rInfo").textContent="A saída não pode ser antes da entrada.";return}
+  const n=Math.round((new Date((b||a)+"T12:00")-new Date(a+"T12:00"))/864e5)+1;$("rInfo").textContent=`${n} ${n>1?"diárias":"diária"} · ${brD(a)}${n>1?" a "+brD(b):""}`}
+$("rIn").addEventListener("change",()=>{if(!$("rOut").value||$("rOut").value<$("rIn").value)$("rOut").value=$("rIn").value;rInfo()});
+$("rOut").addEventListener("change",rInfo);
+$("rForm").addEventListener("submit",async e=>{e.preventDefault();
+  const r={entrada:$("rIn").value,saida:$("rOut").value||$("rIn").value,nome:$("rNome").value.trim(),whatsapp:$("rZap").value.trim(),valor:$("rValor").value===""?null:+$("rValor").value,status:$("rStatus").value};
+  if(!r.entrada){toast("Escolha a entrada",true);return} if(r.saida<r.entrada){toast("A saída não pode ser antes da entrada",true);return}
+  $("rSave").disabled=true;
+  try{await DB.salvarReserva(r);toast(`Reservado: ${brD(r.entrada)}${r.saida!==r.entrada?" a "+brD(r.saida):""}`);$("rForm").reset();$("rInfo").textContent="";await carregarAgenda()}
+  catch(err){toast("Não reservou: "+err.message,true)}
+  $("rSave").disabled=false});
+function listaReservas(){
+  const hoje=isoL(new Date());const l=reservas.filter(x=>x.status!=="cancelada"&&x.saida>=hoje).sort((a,b)=>a.entrada<b.entrada?-1:1);
+  $("rLista").innerHTML=l.length?l.map(r=>`<article class="ritem${r.status==="pre"?" pre":""}" data-id="${r.id}">
+    <div><b>${brD(r.entrada)}${r.saida!==r.entrada?" a "+brD(r.saida):""}</b><small>${[r.nome,r.whatsapp,r.valor!=null?brl(r.valor):null].filter(Boolean).map(s=>String(s).replace(/</g,"&lt;")).join(" · ")||"sem dados do cliente"}</small></div>
+    <span class="pill${r.status==="pre"?" pre":""}">${r.status==="pre"?"pré-reserva":"confirmada"}</span>
+    <div class="acoes">${r.status==="pre"?'<button class="btn y sm" type="button" data-a="ok">Confirmar</button>':""}<button class="btn sm" type="button" data-a="cancel">Cancelar e liberar</button><button class="btn sm del" type="button" data-a="del">Excluir</button></div>
+  </article>`).join(""):'<p class="note">Nenhuma reserva pela frente. Toque num dia do calendário pra cadastrar.</p>';
+}
+$("rLista").addEventListener("click",async e=>{const b=e.target.closest("button[data-a]");if(!b)return;const id=b.closest(".ritem").dataset.id;const r=reservas.find(x=>String(x.id)===id);if(!r)return;
+  if(b.dataset.a!=="ok"&&b.dataset.confirm!=="1"){b.dataset.confirm="1";const t=b.textContent;b.textContent="Toque de novo pra confirmar";setTimeout(()=>{b.dataset.confirm="";b.textContent=t},3000);return}
+  try{ if(b.dataset.a==="del") await DB.excluirReserva(r.id); else await DB.salvarReserva({...r,status:b.dataset.a==="ok"?"confirmada":"cancelada"});
+    toast(b.dataset.a==="ok"?"Reserva confirmada":b.dataset.a==="cancel"?"Reserva cancelada, dias liberados":"Reserva excluída");await carregarAgenda()}
+  catch(err){toast("Não deu: "+err.message,true)}});
+async function carregarAgenda(){reservas=await DB.reservas();desenharCal();listaReservas()}
+
 async function iniciar(){
   if(LIVE){$("mode").textContent="Conectado";$("mode").classList.add("live");$("app").hidden=true;$("login").hidden=false;
-    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);$("login").hidden=true;$("app").hidden=false;await carregar()}catch(e){$("lErr").hidden=false;$("lErr").textContent=e.message}};
-  } else await carregar();
+    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);await carregar();await carregarAgenda();$("login").hidden=true;$("app").hidden=false}catch(e){$("lErr").hidden=false;$("lErr").textContent=/relation|does not exist|42P01|PGRST/.test(e.message)?"Login ok, mas as tabelas ainda não existem no Supabase. Rode o SQL casinha_precos.sql.":e.message}};
+  } else {await carregar();await carregarAgenda();}
 }
 iniciar();
 </script>

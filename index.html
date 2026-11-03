@@ -186,6 +186,7 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .umdia input:checked + span::before{background:var(--yellow) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10l4 4 8-9' fill='none' stroke='%231A1712' stroke-width='3'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--yellow)}
 .umdia input:focus-visible + span::before{outline:3px solid var(--grey);outline-offset:3px}
 .note b{color:var(--yellow);font-weight:600}
+.ocup{border-left:4px solid var(--yellow);padding-left:10px}
 .drinks{display:flex;gap:14px;align-items:center;background:var(--wall2);border:2px solid #3A3832;padding:14px}
 .drinks svg{width:64px;height:64px;flex:none}
 
@@ -525,6 +526,7 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
           </div>
           <label class="f" for="pessoas">Pessoas (até 40)<input type="number" id="pessoas" min="1" max="40" value="20" inputmode="numeric"></label>
           <p class="note" id="diaInfo"></p>
+          <p class="note ocup" id="ocupadas" hidden></p>
         </fieldset>
 
         <fieldset class="blk">
@@ -595,6 +597,7 @@ const LIMPEZA=150,JUROS=0.0299,PIX_DESC=0.05;
    Quando o banco existir, o painel admin controla tudo (casinha_carnes / casinha_config). */
 const SUPABASE_URL="https://mqdhavyaeujufhlqdlfg.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZGhhdnlhZXVqdWZobHFkbGZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDg0OTUsImV4cCI6MjA5NTUyNDQ5NX0.bmlsVIXzQ1H-R4CEVZJzg_8TXygBsSQ57GOteBKqLHE";
 let ACOUGUE="",PRECO_DATA="";
+let OCUPADAS=[];  // [{entrada:"2026-11-07",saida:"2026-11-08"}] vindas da agenda do painel
 let CARNES=[
   {id:"picanha",nome:"Picanha",un:"peça (~1,2 kg)",curto:"peça",preco:110,kg:1.2,ic:"i-picanha"},
   {id:"contra",nome:"Contrafilé",un:"kg",curto:"kg",preco:55,kg:1,ic:"i-contra"},
@@ -670,6 +673,7 @@ function periodo(){
   if(d1<d0) return {erro:"a saída não pode ser antes da entrada"};
   const dias=[];for(let d=new Date(d0);d<=d1;d.setDate(d.getDate()+1)){const dw=d.getDay();dias.push({dw,valor:valorDia(dw)});}
   if(dias.length>7) return {erro:"o máximo é 7 diárias seguidas"};
+  if(OCUPADAS.some(o=>!(b<o.entrada||a>o.saida))) return {erro:"essa data já está reservada, escolha outro dia"};
   const total=dias.reduce((s,x)=>s+x.valor,0);
   const br=x=>x.split("-").reverse().slice(0,2).join("/");
   return {dias,n:dias.length,total,ent:br(a),sai:br(b),dwIn:dias[0].dw,dwOut:dias[dias.length-1].dw};
@@ -689,6 +693,7 @@ let lastLines="";
 function calc(){
   const pac=document.querySelector('input[name="pacote"]:checked').value;
   const pessoas=Math.max(0,+$("pessoas").value||0);
+  mostrarOcupadas();
   const per=periodo(); const d=per&&!per.erro?per:null;
   $("diaInfo").innerHTML=!per?"Escolha a entrada pra ver o valor.":per.erro?`<b>${per.erro[0].toUpperCase()+per.erro.slice(1)}.</b>`:
     (d.n===1?`1 diária (${DIA_LONGO[d.dwIn]}): <span class="v">${brl(d.total)}</span>`
@@ -777,8 +782,23 @@ document.addEventListener("click",e=>{
 $("f").addEventListener("input",calc);
 $("f").addEventListener("change",calc);
 $("f").addEventListener("submit",e=>e.preventDefault());
+/* datas já reservadas (só as datas; nome e valor ficam no painel) */
+async function carregarOcupadas(){
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/casinha_datas_ocupadas",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"});
+    if(!r.ok) return; OCUPADAS=await r.json(); calc();
+  }catch(e){}
+}
+function mostrarOcupadas(){
+  const el=$("ocupadas"); if(!OCUPADAS.length){el.hidden=true;return}
+  const br=x=>x.split("-").reverse().slice(0,2).join("/");
+  el.hidden=false; el.innerHTML="<b>Datas já reservadas:</b> "+OCUPADAS.slice(0,8).map(o=>o.entrada===o.saida?br(o.entrada):`${br(o.entrada)} a ${br(o.saida)}`).join(" · ");
+}
+
 calc();
 carregarPrecos();
+carregarOcupadas();
 
 /* ---- agendar visita ---- */
 (function(){

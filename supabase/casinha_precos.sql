@@ -48,3 +48,39 @@ insert into public.casinha_carnes (slug,nome,unidade,unidade_desc,peso_kg,preco_
  ('paoalho','Pão de alho','pacote','pacote',0,18,'i-pao',6),
  ('coalho','Queijo coalho','pacote','pacote',0,22,'i-queijo',7)
 on conflict (slug) do nothing;
+
+-- =====================================================================
+-- AGENDA DE RESERVAS: dias fechados ficam bloqueados no site
+-- =====================================================================
+create table if not exists public.casinha_reservas (
+  id uuid primary key default gen_random_uuid(),
+  entrada date not null,
+  saida date not null,
+  nome text,
+  whatsapp text,
+  pacote text,
+  valor numeric(10,2),
+  status text not null default 'confirmada' check (status in ('pre','confirmada','cancelada')),
+  obs text,
+  criado_em timestamptz not null default now(),
+  check (saida >= entrada)
+);
+-- impede duas reservas ativas no mesmo dia
+alter table public.casinha_reservas drop constraint if exists casinha_reservas_sem_sobreposicao;
+alter table public.casinha_reservas add constraint casinha_reservas_sem_sobreposicao
+  exclude using gist (daterange(entrada, saida, '[]') with &&) where (status <> 'cancelada');
+alter table public.casinha_reservas enable row level security;
+drop policy if exists "casinha reservas admin imarcas" on public.casinha_reservas;
+create policy "casinha reservas admin imarcas" on public.casinha_reservas for all to authenticated
+  using (public.imarcas_eh_membro()) with check (public.imarcas_eh_membro());
+-- o site só enxerga as DATAS ocupadas (sem nome, telefone ou valor)
+create or replace function public.casinha_datas_ocupadas()
+returns table (entrada date, saida date)
+language sql stable security definer set search_path = ''
+as $$
+  select r.entrada, r.saida from public.casinha_reservas r
+  where r.status <> 'cancelada' and r.saida >= current_date
+  order by r.entrada;
+$$;
+revoke all on function public.casinha_datas_ocupadas() from public;
+grant execute on function public.casinha_datas_ocupadas() to anon, authenticated;
