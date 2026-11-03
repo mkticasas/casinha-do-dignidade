@@ -186,6 +186,9 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .umdia input:checked + span::before{background:var(--yellow) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10l4 4 8-9' fill='none' stroke='%231A1712' stroke-width='3'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--yellow)}
 .umdia input:focus-visible + span::before{outline:3px solid var(--grey);outline-offset:3px}
 .note b{color:var(--yellow);font-weight:600}
+.cupom-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.cupom-row .btn{padding:13px 18px;box-shadow:3px 3px 0 var(--chalk)}
+#cupom{text-transform:uppercase}
 .ocup{border-left:4px solid var(--yellow);padding-left:10px}
 .drinks{display:flex;gap:14px;align-items:center;background:var(--wall2);border:2px solid #3A3832;padding:14px}
 .drinks svg{width:64px;height:64px;flex:none}
@@ -556,6 +559,8 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
             <label class="f" for="pag">Forma de pagamento<select id="pag"></select></label>
             <label class="f" for="nome">Seu nome<input type="text" id="nome" autocomplete="name" placeholder="Como te chamamos"></label>
           </div>
+          <div class="cupom-row"><label class="f" for="cupom">Cupom de desconto<input type="text" id="cupom" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Tem cupom?"></label><button type="button" class="btn" id="cupomBtn">Aplicar</button></div>
+          <p class="note" id="cupomInfo"></p>
         </fieldset>
       </form>
 
@@ -597,7 +602,8 @@ const LIMPEZA=150,JUROS=0.0299,PIX_DESC=0.05;
    Quando o banco existir, o painel admin controla tudo (casinha_carnes / casinha_config). */
 const SUPABASE_URL="https://mqdhavyaeujufhlqdlfg.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xZGhhdnlhZXVqdWZobHFkbGZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NDg0OTUsImV4cCI6MjA5NTUyNDQ5NX0.bmlsVIXzQ1H-R4CEVZJzg_8TXygBsSQ57GOteBKqLHE";
 let ACOUGUE="",PRECO_DATA="";
-let OCUPADAS=[];  // [{entrada:"2026-11-07",saida:"2026-11-08"}] vindas da agenda do painel
+let OCUPADAS=[];
+let CUPOM=null;   // {codigo,tipo:"pct"|"reais",valor} depois de validado no banco  // [{entrada:"2026-11-07",saida:"2026-11-08"}] vindas da agenda do painel
 let CARNES=[
   {id:"picanha",nome:"Picanha",un:"peça (~1,2 kg)",curto:"peça",preco:110,kg:1.2,ic:"i-picanha"},
   {id:"contra",nome:"Contrafilé",un:"kg",curto:"kg",preco:55,kg:1,ic:"i-contra"},
@@ -705,6 +711,9 @@ function calc(){
   const nd=d?d.n:1;
   add(nd>1?`Pacote ${PACOTE[pac].nome} × ${nd} dias`:`Pacote ${PACOTE[pac].nome}`,PACOTE[pac].add*nd);
   add("Taxa de limpeza",LIMPEZA);
+  if(CUPOM){const base=(d?d.total:0)+PACOTE[pac].add*nd;
+    const desc=Math.round((CUPOM.tipo==="pct"?base*CUPOM.valor/100:Math.min(CUPOM.valor,base))*100)/100;
+    if(desc>0){L.push([`Cupom ${CUPOM.codigo}`,-desc]);sub-=desc;}}
   const carn=[];let kg=0;
   CARNES.forEach(c=>{const q=+$(c.id).value||0;$("row-"+c.id).classList.toggle("on",q>0);
     if(q){kg+=q*c.kg;carn.push(`${q} ${plural(q,c.curto)} de ${c.nome}`);add(`${q}× ${c.nome}`,q*c.preco);}});
@@ -731,7 +740,7 @@ function calc(){
     nome?`*Nome:* ${nome}`:null,
     d&&d.n===1?`*Data:* ${d.ent} (${DIA[d.dwIn]})`:null,
     d&&d.n>1?`*Entrada:* ${d.ent} (${DIA[d.dwIn]})`:null, d&&d.n>1?`*Saída:* ${d.sai} (${DIA[d.dwOut]})`:null, d&&d.n>1?`*Diárias:* ${d.n}`:null,
-    `*Pessoas:* ${pessoas}`,`*Pacote:* ${PACOTE[pac].nome}`,
+    `*Pessoas:* ${pessoas}`,`*Pacote:* ${PACOTE[pac].nome}`,CUPOM?`*Cupom:* ${CUPOM.codigo}`:null,
     carn.length?`*Carnes:* ${carn.join(", ")}`:`*Carnes:* sem encomenda`,
     ``,
     `*Total:* ${brl(total)}`,`*Pagamento:* ${parcTxt}`,
@@ -795,6 +804,25 @@ function mostrarOcupadas(){
   const br=x=>x.split("-").reverse().slice(0,2).join("/");
   el.hidden=false; el.innerHTML="<b>Datas já reservadas:</b> "+OCUPADAS.slice(0,8).map(o=>o.entrada===o.saida?br(o.entrada):`${br(o.entrada)} a ${br(o.saida)}`).join(" · ");
 }
+
+/* cupom: o banco confere um código por vez (função casinha_validar_cupom) */
+async function aplicarCupom(){
+  const c=$("cupom").value.trim(),st=$("cupomInfo");
+  if(!c){CUPOM=null;st.textContent="";calc();return}
+  if(!SUPABASE_URL||!SUPABASE_ANON_KEY){CUPOM=null;st.textContent="Cupom não encontrado.";calc();return}
+  st.textContent="Conferindo o cupom…";
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/casinha_validar_cupom",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_codigo:c})});
+    const j=r.ok?await r.json():[];
+    if(j&&j[0]){CUPOM={codigo:j[0].codigo,tipo:j[0].tipo,valor:+j[0].valor};
+      st.innerHTML=`<b>Cupom ${esc(CUPOM.codigo)} aplicado:</b> ${CUPOM.tipo==="pct"?String(CUPOM.valor).replace(".",",")+"%":brl(CUPOM.valor)} de desconto na diária e no pacote.`;}
+    else{CUPOM=null;st.textContent="Cupom inválido ou vencido.";}
+  }catch(e){CUPOM=null;st.textContent="Não deu pra conferir o cupom agora. Tenta de novo.";}
+  calc();
+}
+$("cupomBtn").addEventListener("click",aplicarCupom);
+$("cupom").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();aplicarCupom();}});
+$("cupom").addEventListener("input",()=>{if(CUPOM&&$("cupom").value.trim().toUpperCase()!==CUPOM.codigo.toUpperCase()){CUPOM=null;$("cupomInfo").textContent="";calc();}});
 
 calc();
 carregarPrecos();

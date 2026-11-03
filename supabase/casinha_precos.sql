@@ -84,3 +84,34 @@ as $$
 $$;
 revoke all on function public.casinha_datas_ocupadas() from public;
 grant execute on function public.casinha_datas_ocupadas() to anon, authenticated;
+
+-- =====================================================================
+-- CUPONS DE DESCONTO (valores definidos depois, no painel)
+-- =====================================================================
+create table if not exists public.casinha_cupons (
+  id uuid primary key default gen_random_uuid(),
+  codigo text not null,
+  tipo text not null default 'pct' check (tipo in ('pct','reais')),
+  valor numeric(10,2) not null default 0 check (valor >= 0),
+  valido_ate date,
+  ativo boolean not null default true,
+  descricao text,
+  criado_em timestamptz not null default now()
+);
+create unique index if not exists casinha_cupons_codigo_uniq on public.casinha_cupons (upper(codigo));
+alter table public.casinha_cupons enable row level security;
+drop policy if exists "casinha cupons admin imarcas" on public.casinha_cupons;
+create policy "casinha cupons admin imarcas" on public.casinha_cupons for all to authenticated
+  using (public.imarcas_eh_membro()) with check (public.imarcas_eh_membro());
+-- o site só confere UM código por vez; a lista de cupons nunca sai do banco
+create or replace function public.casinha_validar_cupom(p_codigo text)
+returns table (codigo text, tipo text, valor numeric)
+language sql stable security definer set search_path = ''
+as $$
+  select c.codigo, c.tipo, c.valor from public.casinha_cupons c
+  where upper(c.codigo) = upper(trim(p_codigo)) and c.ativo and c.valor > 0
+    and (c.valido_ate is null or c.valido_ate >= current_date)
+  limit 1;
+$$;
+revoke all on function public.casinha_validar_cupom(text) from public;
+grant execute on function public.casinha_validar_cupom(text) to anon, authenticated;

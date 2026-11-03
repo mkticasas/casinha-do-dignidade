@@ -155,6 +155,21 @@ input[type=number]{font-variant-numeric:tabular-nums}
       <div><button class="btn" id="add" type="button">+ Adicionar corte</button></div>
     </section>
 
+    <section aria-labelledby="t-cupons">
+      <div class="sec-title"><h2 id="t-cupons">Cupons</h2><p>desconto na diária e no pacote</p></div>
+      <form class="ficha" id="cForm" novalidate>
+        <div class="rgrid">
+          <label for="cCod">Código<input type="text" id="cCod" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="EX: FESTA10" style="text-transform:uppercase"></label>
+          <label for="cTipo">Tipo<select id="cTipo"><option value="pct">% de desconto</option><option value="reais">R$ de desconto</option></select></label>
+          <label for="cVal">Valor<input type="number" id="cVal" step="0.5" min="0" inputmode="decimal" placeholder="definir depois"></label>
+          <label for="cAte">Válido até<input type="date" id="cAte"></label>
+          <label for="cDesc" style="grid-column:span 2">Pra quem / observação<input type="text" id="cDesc" placeholder="ex.: parceiros, aniversariante, influencer"></label>
+        </div>
+        <div class="foot"><span class="note">Cupom com valor zero fica salvo, mas não funciona no site até você definir o valor.</span><button class="btn y sm" type="submit" id="cSave">Criar cupom</button></div>
+      </form>
+      <div class="rlist" id="cLista"></div>
+    </section>
+
     <section aria-labelledby="t-acougue">
       <div class="sec-title"><h2 id="t-acougue">Açougue parceiro</h2><p>aparece no site quando preenchido</p></div>
       <div class="acougue">
@@ -230,6 +245,17 @@ const DB={
     catch(e){ if(/sobreposicao|23P01/.test(e.message)) throw new Error("já tem reserva ativa nesses dias"); throw e }},
   async excluirReserva(id){ if(!LIVE){store.set("reservas",(await DB.reservas()).filter(x=>x.id!==id));return}
     await api("casinha_reservas?id=eq."+id,{method:"DELETE"})},
+  async cupons(){ if(!LIVE) return store.get("cupons",[]);
+    return api("casinha_cupons?select=*&order=criado_em.desc")},
+  async salvarCupom(c){
+    const body={codigo:c.codigo,tipo:c.tipo,valor:c.valor||0,valido_ate:c.valido_ate||null,ativo:c.ativo!==false,descricao:c.descricao||null};
+    if(!LIVE){const l=await DB.cupons();
+      if(l.some(x=>x.id!==c.id&&x.codigo.toUpperCase()===c.codigo.toUpperCase())) throw new Error("já existe um cupom com esse código");
+      const i=l.findIndex(x=>x.id===c.id); if(i<0) l.unshift({...body,id:"c"+Date.now()}); else l[i]={...l[i],...body}; store.set("cupons",l); return}
+    try{ c.id? await api("casinha_cupons?id=eq."+c.id,{method:"PATCH",body:JSON.stringify(body)}) : await api("casinha_cupons",{method:"POST",body:JSON.stringify(body)}) }
+    catch(e){ if(/codigo_uniq|23505/.test(e.message)) throw new Error("já existe um cupom com esse código"); throw e }},
+  async excluirCupom(id){ if(!LIVE){store.set("cupons",(await DB.cupons()).filter(x=>x.id!==id));return}
+    await api("casinha_cupons?id=eq."+id,{method:"DELETE"})},
   async salvarConfig(c){ if(!LIVE){store.set("config",c);return}
     await api("casinha_config?id=eq.1",{method:"PATCH",body:JSON.stringify(c)})}
 };
@@ -332,10 +358,41 @@ $("rLista").addEventListener("click",async e=>{const b=e.target.closest("button[
   catch(err){toast("Não deu: "+err.message,true)}});
 async function carregarAgenda(){reservas=await DB.reservas();desenharCal();listaReservas()}
 
+/* ---- cupons ---- */
+let cupons=[];
+function descCupom(c){if(!(+c.valor>0))return "sem valor definido";return c.tipo==="pct"?String(+c.valor).replace(".",",")+"% de desconto":brl(c.valor)+" de desconto"}
+function listaCupons(){
+  const hoje=isoL(new Date());
+  $("cLista").innerHTML=cupons.length?cupons.map(c=>{const venc=c.valido_ate&&c.valido_ate<hoje;const vale=c.ativo&&!venc&&+c.valor>0;
+    return `<article class="ritem${vale?"":" pre"}" data-id="${c.id}">
+    <div><b>${String(c.codigo).replace(/</g,"&lt;")}</b><small>${[descCupom(c),c.valido_ate?"até "+brD(c.valido_ate):"sem validade",c.descricao].filter(Boolean).map(s=>String(s).replace(/</g,"&lt;")).join(" · ")}</small></div>
+    <span class="pill${vale?"":" pre"}">${!c.ativo?"desligado":venc?"vencido":+c.valor>0?"valendo":"sem valor"}</span>
+    <div class="acoes"><label class="toggle" style="display:inline-flex"><input type="checkbox" data-a="ativo"${c.ativo?" checked":""}> Ativo</label>
+      <input type="number" data-a="valor" step="0.5" min="0" inputmode="decimal" value="${+c.valor>0?+c.valor:""}" placeholder="valor" style="width:110px" aria-label="Valor do cupom ${c.codigo}">
+      <button class="btn y sm" type="button" data-a="salvar">Salvar valor</button><button class="btn sm del" type="button" data-a="del">Excluir</button></div>
+  </article>`}).join(""):'<p class="note">Nenhum cupom ainda.</p>';
+}
+$("cForm").addEventListener("submit",async e=>{e.preventDefault();
+  const c={codigo:$("cCod").value.trim().toUpperCase().replace(/\s+/g,""),tipo:$("cTipo").value,valor:$("cVal").value===""?0:+$("cVal").value,valido_ate:$("cAte").value||null,descricao:$("cDesc").value.trim()};
+  if(!c.codigo){toast("Dê um código ao cupom",true);return}
+  if(c.tipo==="pct"&&c.valor>100){toast("Desconto em % vai até 100",true);return}
+  $("cSave").disabled=true;
+  try{await DB.salvarCupom(c);toast(`Cupom ${c.codigo} criado`);$("cForm").reset();await carregarCupons()}catch(err){toast("Não criou: "+err.message,true)}
+  $("cSave").disabled=false});
+$("cLista").addEventListener("click",async e=>{const b=e.target.closest("button[data-a]");if(!b)return;const it=b.closest(".ritem");const c=cupons.find(x=>String(x.id)===it.dataset.id);if(!c)return;
+  if(b.dataset.a==="del"){if(b.dataset.confirm!=="1"){b.dataset.confirm="1";b.textContent="Toque de novo pra excluir";setTimeout(()=>{b.dataset.confirm="";b.textContent="Excluir"},3000);return}
+    try{await DB.excluirCupom(c.id);toast("Cupom excluído");await carregarCupons()}catch(err){toast("Não excluiu: "+err.message,true)}return}
+  const v=it.querySelector("input[data-a=valor]").value;
+  if(c.tipo==="pct"&&+v>100){toast("Desconto em % vai até 100",true);return}
+  try{await DB.salvarCupom({...c,valor:v===""?0:+v,ativo:it.querySelector("input[data-a=ativo]").checked});toast(`Cupom ${c.codigo} salvo`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
+$("cLista").addEventListener("change",async e=>{const t=e.target;if(t.dataset.a!=="ativo")return;const it=t.closest(".ritem");const c=cupons.find(x=>String(x.id)===it.dataset.id);
+  try{await DB.salvarCupom({...c,ativo:t.checked});toast(t.checked?`Cupom ${c.codigo} ligado`:`Cupom ${c.codigo} desligado`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
+async function carregarCupons(){cupons=await DB.cupons();listaCupons()}
+
 async function iniciar(){
   if(LIVE){$("mode").textContent="Conectado";$("mode").classList.add("live");$("app").hidden=true;$("login").hidden=false;
-    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);await carregar();await carregarAgenda();$("login").hidden=true;$("app").hidden=false}catch(e){$("lErr").hidden=false;$("lErr").textContent=/relation|does not exist|42P01|PGRST/.test(e.message)?"Login ok, mas as tabelas ainda não existem no Supabase. Rode o SQL casinha_precos.sql.":e.message}};
-  } else {await carregar();await carregarAgenda();}
+    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);await carregar();await carregarAgenda();await carregarCupons();$("login").hidden=true;$("app").hidden=false}catch(e){$("lErr").hidden=false;$("lErr").textContent=/relation|does not exist|42P01|PGRST/.test(e.message)?"Login ok, mas as tabelas ainda não existem no Supabase. Rode o SQL casinha_precos.sql.":e.message}};
+  } else {await carregar();await carregarAgenda();await carregarCupons();}
 }
 iniciar();
 </script>
