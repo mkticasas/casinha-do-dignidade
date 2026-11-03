@@ -186,6 +186,8 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .umdia input:checked + span::before{background:var(--yellow) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10l4 4 8-9' fill='none' stroke='%231A1712' stroke-width='3'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--yellow)}
 .umdia input:focus-visible + span::before{outline:3px solid var(--grey);outline-offset:3px}
 .note b{color:var(--yellow);font-weight:600}
+.cupom-bar{background:var(--yellow);color:var(--paper-ink);font:800 14px var(--body);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;transform:rotate(-.6deg);box-shadow:4px 4px 0 var(--grey)}
+.cupom-bar a{color:inherit;font:400 16px var(--marker);text-decoration:underline}
 .cupom-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
 .cupom-row .btn{padding:13px 18px;box-shadow:3px 3px 0 var(--chalk)}
 #cupom{text-transform:uppercase}
@@ -402,6 +404,7 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
     <span class="pill">prévia · valores de exemplo</span>
   </header>
 
+  <div class="cupom-bar" id="cupomBar" hidden></div>
   <div class="hero">
     <div>
       <p class="eyebrow">Rio Preto · casa de festa</p>
@@ -815,14 +818,24 @@ async function aplicarCupom(){
     const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/casinha_validar_cupom",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_codigo:c})});
     const j=r.ok?await r.json():[];
     if(j&&j[0]){CUPOM={codigo:j[0].codigo,tipo:j[0].tipo,valor:+j[0].valor};
-      st.innerHTML=`<b>Cupom ${esc(CUPOM.codigo)} aplicado:</b> ${CUPOM.tipo==="pct"?String(CUPOM.valor).replace(".",",")+"%":brl(CUPOM.valor)} de desconto na diária e no pacote.`;}
-    else{CUPOM=null;st.textContent="Cupom inválido ou vencido.";}
+      const txt=`${CUPOM.tipo==="pct"?String(CUPOM.valor).replace(".",",")+"%":brl(CUPOM.valor)} de desconto na diária e no pacote`;
+      st.innerHTML=`<b>Cupom ${esc(CUPOM.codigo)} aplicado:</b> ${txt}.`;
+      try{localStorage.setItem("casinha_cupom",CUPOM.codigo)}catch(e){}
+      $("cupomBar").hidden=false;$("cupomBar").innerHTML=`<span>Cupom <b>${esc(CUPOM.codigo)}</b> ativado: ${txt}.</span><a href="#orcamento">usar agora</a>`;}
+    else{CUPOM=null;st.textContent="Cupom inválido ou vencido.";$("cupomBar").hidden=true;try{localStorage.removeItem("casinha_cupom")}catch(e){}}
   }catch(e){CUPOM=null;st.textContent="Não deu pra conferir o cupom agora. Tenta de novo.";}
   calc();
 }
 $("cupomBtn").addEventListener("click",aplicarCupom);
 $("cupom").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();aplicarCupom();}});
-$("cupom").addEventListener("input",()=>{if(CUPOM&&$("cupom").value.trim().toUpperCase()!==CUPOM.codigo.toUpperCase()){CUPOM=null;$("cupomInfo").textContent="";calc();}});
+$("cupom").addEventListener("input",()=>{if(CUPOM&&$("cupom").value.trim().toUpperCase()!==CUPOM.codigo.toUpperCase()){CUPOM=null;$("cupomInfo").textContent="";$("cupomBar").hidden=true;calc();}});
+/* link de divulgação: ?cupom=CODIGO aplica sozinho (e fica guardado neste aparelho) */
+(function(){
+  let c=null;
+  try{c=new URLSearchParams(location.search).get("cupom")}catch(e){}
+  if(!c){try{c=localStorage.getItem("casinha_cupom")}catch(e){}}
+  if(c){$("cupom").value=c.trim().toUpperCase();aplicarCupom();}
+})();
 
 calc();
 carregarPrecos();

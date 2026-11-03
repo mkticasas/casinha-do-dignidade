@@ -87,6 +87,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .lg::before{content:"";display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px}
 .lg.c::before{background:var(--yellow)} .lg.p::before{border:2px dashed var(--yellow)}
 .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.linkbox{margin-top:8px;font:600 16px var(--body)!important;color:var(--muted);background:transparent;border:1px dashed var(--line);padding:8px;width:100%}
 .rlist{display:grid;gap:8px}
 .ritem{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--wall2);border:2px solid var(--line);padding:12px;border-left:6px solid var(--yellow)}
 .ritem.pre{border-left-style:dashed}
@@ -359,6 +360,9 @@ $("rLista").addEventListener("click",async e=>{const b=e.target.closest("button[
 async function carregarAgenda(){reservas=await DB.reservas();desenharCal();listaReservas()}
 
 /* ---- cupons ---- */
+// endereço do site: o link de divulgação é SITE_URL?cupom=CODIGO
+const SITE_URL="https://mkticasas.github.io/casinha-do-dignidade/";
+const linkCupom=c=>SITE_URL+"?cupom="+encodeURIComponent(c.codigo);
 let cupons=[];
 function descCupom(c){if(!(+c.valor>0))return "sem valor definido";return c.tipo==="pct"?String(+c.valor).replace(".",",")+"% de desconto":brl(c.valor)+" de desconto"}
 function listaCupons(){
@@ -369,7 +373,8 @@ function listaCupons(){
     <span class="pill${vale?"":" pre"}">${!c.ativo?"desligado":venc?"vencido":+c.valor>0?"valendo":"sem valor"}</span>
     <div class="acoes"><label class="toggle" style="display:inline-flex"><input type="checkbox" data-a="ativo"${c.ativo?" checked":""}> Ativo</label>
       <input type="number" data-a="valor" step="0.5" min="0" inputmode="decimal" value="${+c.valor>0?+c.valor:""}" placeholder="valor" style="width:110px" aria-label="Valor do cupom ${c.codigo}">
-      <button class="btn y sm" type="button" data-a="salvar">Salvar valor</button><button class="btn sm del" type="button" data-a="del">Excluir</button></div>
+      <button class="btn y sm" type="button" data-a="salvar">Salvar valor</button><button class="btn sm" type="button" data-a="link">Copiar link de divulgação</button><button class="btn sm del" type="button" data-a="del">Excluir</button>
+      <input type="text" class="linkbox" readonly value="${linkCupom(c).replace(/"/g,"&quot;")}" aria-label="Link de divulgação do cupom ${c.codigo}"></div>
   </article>`}).join(""):'<p class="note">Nenhum cupom ainda.</p>';
 }
 $("cForm").addEventListener("submit",async e=>{e.preventDefault();
@@ -380,6 +385,10 @@ $("cForm").addEventListener("submit",async e=>{e.preventDefault();
   try{await DB.salvarCupom(c);toast(`Cupom ${c.codigo} criado`);$("cForm").reset();await carregarCupons()}catch(err){toast("Não criou: "+err.message,true)}
   $("cSave").disabled=false});
 $("cLista").addEventListener("click",async e=>{const b=e.target.closest("button[data-a]");if(!b)return;const it=b.closest(".ritem");const c=cupons.find(x=>String(x.id)===it.dataset.id);if(!c)return;
+  if(b.dataset.a==="link"){const box=it.querySelector(".linkbox");
+    try{await navigator.clipboard.writeText(box.value);toast("Link copiado: é só colar pro divulgador")}
+    catch(err){box.focus();box.select();toast("Selecionei o link: copie com Ctrl+C ou segurando o dedo",true)}
+    return}
   if(b.dataset.a==="del"){if(b.dataset.confirm!=="1"){b.dataset.confirm="1";b.textContent="Toque de novo pra excluir";setTimeout(()=>{b.dataset.confirm="";b.textContent="Excluir"},3000);return}
     try{await DB.excluirCupom(c.id);toast("Cupom excluído");await carregarCupons()}catch(err){toast("Não excluiu: "+err.message,true)}return}
   const v=it.querySelector("input[data-a=valor]").value;
