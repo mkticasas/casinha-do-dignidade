@@ -82,6 +82,9 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .cal-grid button.passado{opacity:.35;cursor:default}
 .cal-grid button.hoje{outline:2px solid var(--chalk);outline-offset:-3px}
 .cal-grid button.c{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.cal-grid button.sel{background:rgba(31,174,91,.28);border-color:var(--green);color:var(--chalk)}
+.cal-grid button.sel-ini,.cal-grid button.sel-fim{background:var(--green);border-color:var(--green);color:#fff}
+.lg.s::before{background:var(--green)}
 .cal-grid button.p{background:repeating-linear-gradient(-45deg,rgba(255,210,63,.45) 0 6px,transparent 6px 12px);border:2px dashed var(--yellow)}
 .cal-leg{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .lg::before{content:"";display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px}
@@ -134,7 +137,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
       <div class="cal">
         <div class="cal-head"><button type="button" id="calPrev" aria-label="Mês anterior">‹</button><b id="calMes"></b><button type="button" id="calNext" aria-label="Próximo mês">›</button></div>
         <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-leg"><span class="lg c">confirmada</span><span class="lg p">pré-reserva</span><span>toque num dia livre pra preencher a reserva</span></div>
+        <div class="cal-leg"><span class="lg c">confirmada</span><span class="lg p">pré-reserva</span><span class="lg s">selecionando</span><span>1º toque: entrada · 2º toque: saída</span></div>
       </div>
       <form class="ficha" id="rForm" novalidate>
         <div class="ficha-top"><b style="font:400 22px var(--display);text-transform:uppercase">Nova reserva</b></div>
@@ -348,23 +351,34 @@ function desenharCal(){
   const hoje=isoL(new Date()),n=new Date(y,m+1,0).getDate();
   for(let d=1;d<=n;d++){const iso=isoL(new Date(y,m,d,12));const st=statusDia(iso);
     const r=reservas.find(x=>x.status!=="cancelada"&&iso>=x.entrada&&iso<=x.saida);
-    g.insertAdjacentHTML("beforeend",`<button type="button" data-d="${iso}" class="${st}${iso<hoje?" passado":""}${iso===hoje?" hoje":""}" aria-label="${d} de ${MESES[m]}${r?" — reservado"+(r.nome?" por "+r.nome:""):""}" title="${r?(r.nome||"reservado"):""}">${d}</button>`)}
+    const sa=$("rIn").value,sb=$("rOut").value||sa;
+    const sel=!st&&sa&&iso>=sa&&iso<=sb?(" sel"+(iso===sa?" sel-ini":"")+(iso===sb?" sel-fim":"")):"";
+    g.insertAdjacentHTML("beforeend",`<button type="button" data-d="${iso}" class="${st}${sel}${iso<hoje?" passado":""}${iso===hoje?" hoje":""}" aria-label="${d} de ${MESES[m]}${r?" — reservado"+(r.nome?" por "+r.nome:""):""}" title="${r?(r.nome||"reservado"):""}">${d}</button>`)}
 }
+let selAberta=false; // true depois do 1º toque, esperando o dia da saída
 $("calGrid").addEventListener("click",e=>{const b=e.target.closest("button[data-d]");if(!b||b.classList.contains("passado"))return;
-  if(statusDia(b.dataset.d)){toast("Esse dia já está reservado",true);return}
-  $("rIn").value=b.dataset.d;$("rOut").value=b.dataset.d;$("rNome").focus();rInfo()});
+  const d=b.dataset.d;
+  if(statusDia(d)){toast("Esse dia já está reservado",true);return}
+  const ini=$("rIn").value;
+  if(selAberta&&ini&&d>=ini){
+    // confere se não tem dia reservado no meio do período
+    for(let x=new Date(ini+"T12:00");isoL(x)<=d;x.setDate(x.getDate()+1)){if(statusDia(isoL(x))){toast(`O dia ${brD(isoL(x))} já está reservado no meio do período`,true);return}}
+    $("rOut").value=d;selAberta=false;
+  } else {$("rIn").value=d;$("rOut").value=d;selAberta=true;}
+  rInfo();desenharCal();
+  if(!selAberta)$("rNome").focus();});
 $("calPrev").onclick=()=>{calRef.setMonth(calRef.getMonth()-1);desenharCal()};
 $("calNext").onclick=()=>{calRef.setMonth(calRef.getMonth()+1);desenharCal()};
 function rInfo(){const a=$("rIn").value,b=$("rOut").value;if(!a){$("rInfo").textContent="";return}
   if(b&&b<a){$("rInfo").textContent="A saída não pode ser antes da entrada.";return}
-  const n=Math.round((new Date((b||a)+"T12:00")-new Date(a+"T12:00"))/864e5)+1;$("rInfo").textContent=`${n} ${n>1?"diárias":"diária"} · ${brD(a)}${n>1?" a "+brD(b):""}`}
-$("rIn").addEventListener("change",()=>{if(!$("rOut").value||$("rOut").value<$("rIn").value)$("rOut").value=$("rIn").value;rInfo()});
-$("rOut").addEventListener("change",rInfo);
+  const n=Math.round((new Date((b||a)+"T12:00")-new Date(a+"T12:00"))/864e5)+1;$("rInfo").textContent=`${n} ${n>1?"diárias":"diária"} · ${brD(a)}${n>1?" a "+brD(b):""}${selAberta?" · toque no dia da saída (ou já pode salvar se for 1 dia)":""}`}
+$("rIn").addEventListener("change",()=>{if(!$("rOut").value||$("rOut").value<$("rIn").value)$("rOut").value=$("rIn").value;selAberta=false;rInfo();desenharCal()});
+$("rOut").addEventListener("change",()=>{selAberta=false;rInfo();desenharCal()});
 $("rForm").addEventListener("submit",async e=>{e.preventDefault();
   const r={entrada:$("rIn").value,saida:$("rOut").value||$("rIn").value,nome:$("rNome").value.trim(),whatsapp:$("rZap").value.trim(),valor:$("rValor").value===""?null:+$("rValor").value,status:$("rStatus").value};
   if(!r.entrada){toast("Escolha a entrada",true);return} if(r.saida<r.entrada){toast("A saída não pode ser antes da entrada",true);return}
   $("rSave").disabled=true;
-  try{await DB.salvarReserva(r);toast(`Reservado: ${brD(r.entrada)}${r.saida!==r.entrada?" a "+brD(r.saida):""}`);$("rForm").reset();$("rInfo").textContent="";await carregarAgenda()}
+  try{await DB.salvarReserva(r);toast(`Reservado: ${brD(r.entrada)}${r.saida!==r.entrada?" a "+brD(r.saida):""}`);$("rForm").reset();$("rInfo").textContent="";selAberta=false;await carregarAgenda()}
   catch(err){toast("Não reservou: "+err.message,true)}
   $("rSave").disabled=false});
 function listaReservas(){
