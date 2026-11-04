@@ -147,7 +147,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
           <label for="rStatus">Situação<select id="rStatus"><option value="confirmada">Confirmada (pagou)</option><option value="pre">Pré-reserva (segurando)</option></select></label>
           <label for="rNome">Cliente<input type="text" id="rNome" placeholder="Nome"></label>
           <label for="rZap">WhatsApp<input type="text" id="rZap" inputmode="tel" placeholder="(17) 9…"></label>
-          <label for="rValor">Valor (R$)<input type="number" id="rValor" step="0.01" min="0" inputmode="decimal"></label>
+          <label for="rValor">Valor (R$)<input type="text" id="rValor" class="money" inputmode="numeric" placeholder="0,00"></label>
         </div>
         <div class="foot"><span id="rInfo"></span><button class="btn y sm" type="submit" id="rSave">Reservar e bloquear</button></div>
       </form>
@@ -167,7 +167,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
         <div class="rgrid">
           <label for="cCod">Código<input type="text" id="cCod" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="EX: FESTA10" style="text-transform:uppercase"></label>
           <label for="cTipo">Tipo<select id="cTipo"><option value="pct">% de desconto</option><option value="reais">R$ de desconto</option></select></label>
-          <label for="cVal">Valor<input type="number" id="cVal" step="0.5" min="0" inputmode="decimal" placeholder="definir depois"></label>
+          <label for="cVal">Valor<input type="text" id="cVal" inputmode="decimal" placeholder="definir depois"></label>
           <label for="cAte">Válido até<input type="date" id="cAte"></label>
           <label for="cDesc" style="grid-column:span 2">Pra quem / observação<input type="text" id="cDesc" placeholder="ex.: parceiros, aniversariante, influencer"></label>
         </div>
@@ -200,6 +200,11 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 /* ======================= */
 
 const $=id=>document.getElementById(id);
+/* dinheiro com máscara de centavos: digitar 12500 vira 125,00 */
+const fmtMoney=v=>(v===null||v===undefined||v===""||isNaN(+v))?"":(+v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const moneyVal=el=>{const s=(el.value||"").replace(/\D/g,"");return s?(+s)/100:null};
+document.addEventListener("input",e=>{const el=e.target;if(!el.classList||!el.classList.contains("money"))return;
+  const s=el.value.replace(/\D/g,"").replace(/^0+(?=\d)/,"").slice(0,11);el.value=s?fmtMoney((+s)/100):"";},true);
 const brl=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const UN={kg:"kg",peca:"peça",pacote:"pacote"};
 const venda=(c,m)=>Math.round((+c||0)*(1+(m===""||m==null?0:+m)/100)*100)/100;
@@ -303,7 +308,7 @@ function ficha(c){
      <input class="nome" id="${id("nome")}" value="${(c.nome||"").replace(/"/g,"&quot;")}" placeholder="Nome do corte"></div>
    <div class="grid">
      <label for="${id("un")}">Vende por<select id="${id("un")}">${Object.entries(UN).map(([k,v])=>`<option value="${k}"${c.unidade===k?" selected":""}>${v}</option>`).join("")}</select></label>
-     <label for="${id("custo")}">Preço do açougue (R$)<input id="${id("custo")}" type="number" step="0.01" min="0" inputmode="decimal" value="${c.preco_custo??""}"></label>
+     <label for="${id("custo")}">Preço do açougue (R$)<input id="${id("custo")}" type="text" class="money" inputmode="numeric" placeholder="0,00" value="${fmtMoney(c.preco_custo)}"></label>
      <label for="${id("marg")}">Margem (%)<input id="${id("marg")}" type="number" step="0.5" min="0" inputmode="decimal" placeholder="sem margem" value="${c.margem_pct??""}"></label>
      <div class="venda"><small>Preço no site</small><b id="${id("venda")}">${brl(venda(c.preco_custo,c.margem_pct))}</b></div>
      <label for="${id("peso")}" class="peso"${c.unidade==="peca"?"":" hidden"}>Peso da peça (kg)<input id="${id("peso")}" type="number" step="0.1" min="0" inputmode="decimal" value="${c.peso_kg||""}"></label>
@@ -313,7 +318,7 @@ function ficha(c){
      <span>atualizado ${fmtData(c.atualizado_em)}</span>
      <div class="acoes"><button class="btn sm del" type="button" data-act="del">Excluir</button><button class="btn y sm" type="button" data-act="save">Salvar</button></div>
    </div>`;
-  const read=()=>({...c,nome:$(id("nome")).value.trim(),unidade:$(id("un")).value,preco_custo:+$(id("custo")).value||0,
+  const read=()=>({...c,nome:$(id("nome")).value.trim(),unidade:$(id("un")).value,preco_custo:moneyVal($(id("custo")))||0,
     margem_pct:$(id("marg")).value===""?null:+$(id("marg")).value,ativo:$(id("ativo")).checked,
     peso_kg:$(id("un")).value==="peca"?(+$(id("peso")).value||0):($(id("un")).value==="kg"?1:0)});
   el.addEventListener("input",()=>{const v=read();$(id("venda")).textContent=brl(venda(v.preco_custo,v.margem_pct));
@@ -375,7 +380,7 @@ function rInfo(){const a=$("rIn").value,b=$("rOut").value;if(!a){$("rInfo").text
 $("rIn").addEventListener("change",()=>{if(!$("rOut").value||$("rOut").value<$("rIn").value)$("rOut").value=$("rIn").value;selAberta=false;rInfo();desenharCal()});
 $("rOut").addEventListener("change",()=>{selAberta=false;rInfo();desenharCal()});
 $("rForm").addEventListener("submit",async e=>{e.preventDefault();
-  const r={entrada:$("rIn").value,saida:$("rOut").value||$("rIn").value,nome:$("rNome").value.trim(),whatsapp:$("rZap").value.trim(),valor:$("rValor").value===""?null:+$("rValor").value,status:$("rStatus").value};
+  const r={entrada:$("rIn").value,saida:$("rOut").value||$("rIn").value,nome:$("rNome").value.trim(),whatsapp:$("rZap").value.trim(),valor:moneyVal($("rValor")),status:$("rStatus").value};
   if(!r.entrada){toast("Escolha a entrada",true);return} if(r.saida<r.entrada){toast("A saída não pode ser antes da entrada",true);return}
   $("rSave").disabled=true;
   try{await DB.salvarReserva(r);toast(`Reservado: ${brD(r.entrada)}${r.saida!==r.entrada?" a "+brD(r.saida):""}`);$("rForm").reset();$("rInfo").textContent="";selAberta=false;await carregarAgenda()}
@@ -397,6 +402,7 @@ $("rLista").addEventListener("click",async e=>{const b=e.target.closest("button[
 async function carregarAgenda(){reservas=await DB.reservas();desenharCal();listaReservas()}
 
 /* ---- cupons ---- */
+$("cTipo").addEventListener("change",()=>{const reais=$("cTipo").value==="reais";$("cVal").classList.toggle("money",reais);$("cVal").inputMode=reais?"numeric":"decimal";$("cVal").placeholder=reais?"0,00":"definir depois";$("cVal").value="";});
 // endereço do site: o link de divulgação é SITE_URL?cupom=CODIGO
 const SITE_URL="https://mkticasas.github.io/casinha-do-dignidade/";
 const linkCupom=c=>SITE_URL+"?cupom="+encodeURIComponent(c.codigo);
@@ -409,13 +415,13 @@ function listaCupons(){
     <div><b>${String(c.codigo).replace(/</g,"&lt;")}</b><small>${[descCupom(c),c.valido_ate?"até "+brD(c.valido_ate):"sem validade",c.descricao].filter(Boolean).map(s=>String(s).replace(/</g,"&lt;")).join(" · ")}</small></div>
     <span class="pill${vale?"":" pre"}">${!c.ativo?"desligado":venc?"vencido":+c.valor>0?"valendo":"sem valor"}</span>
     <div class="acoes"><label class="toggle" style="display:inline-flex"><input type="checkbox" data-a="ativo"${c.ativo?" checked":""}> Ativo</label>
-      <input type="number" data-a="valor" step="0.5" min="0" inputmode="decimal" value="${+c.valor>0?+c.valor:""}" placeholder="valor" style="width:110px" aria-label="Valor do cupom ${c.codigo}">
+      <input type="text" data-a="valor" class="${c.tipo==="reais"?"money":""}" inputmode="${c.tipo==="reais"?"numeric":"decimal"}" value="${+c.valor>0?(c.tipo==="reais"?fmtMoney(c.valor):String(+c.valor).replace(".",",")):""}" placeholder="${c.tipo==="reais"?"0,00":"valor %"}" style="width:110px" aria-label="Valor do cupom ${c.codigo}">
       <button class="btn y sm" type="button" data-a="salvar">Salvar valor</button><button class="btn sm" type="button" data-a="link">Copiar link de divulgação</button><button class="btn sm del" type="button" data-a="del">Excluir</button>
       <input type="text" class="linkbox" readonly value="${linkCupom(c).replace(/"/g,"&quot;")}" aria-label="Link de divulgação do cupom ${c.codigo}"></div>
   </article>`}).join(""):'<p class="note">Nenhum cupom ainda.</p>';
 }
 $("cForm").addEventListener("submit",async e=>{e.preventDefault();
-  const c={codigo:$("cCod").value.trim().toUpperCase().replace(/\s+/g,""),tipo:$("cTipo").value,valor:$("cVal").value===""?0:+$("cVal").value,valido_ate:$("cAte").value||null,descricao:$("cDesc").value.trim()};
+  const c={codigo:$("cCod").value.trim().toUpperCase().replace(/\s+/g,""),tipo:$("cTipo").value,valor:$("cTipo").value==="reais"?(moneyVal($("cVal"))||0):(+$("cVal").value.replace(",",".")||0),valido_ate:$("cAte").value||null,descricao:$("cDesc").value.trim()};
   if(!c.codigo){toast("Dê um código ao cupom",true);return}
   if(c.tipo==="pct"&&c.valor>100){toast("Desconto em % vai até 100",true);return}
   $("cSave").disabled=true;
@@ -428,9 +434,9 @@ $("cLista").addEventListener("click",async e=>{const b=e.target.closest("button[
     return}
   if(b.dataset.a==="del"){if(b.dataset.confirm!=="1"){b.dataset.confirm="1";b.textContent="Toque de novo pra excluir";setTimeout(()=>{b.dataset.confirm="";b.textContent="Excluir"},3000);return}
     try{await DB.excluirCupom(c.id);toast("Cupom excluído");await carregarCupons()}catch(err){toast("Não excluiu: "+err.message,true)}return}
-  const v=it.querySelector("input[data-a=valor]").value;
-  if(c.tipo==="pct"&&+v>100){toast("Desconto em % vai até 100",true);return}
-  try{await DB.salvarCupom({...c,valor:v===""?0:+v,ativo:it.querySelector("input[data-a=ativo]").checked});toast(`Cupom ${c.codigo} salvo`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
+  const vi=it.querySelector("input[data-a=valor]");const v=c.tipo==="reais"?(moneyVal(vi)||0):(+vi.value.replace(",",".")||0);
+  if(c.tipo==="pct"&&v>100){toast("Desconto em % vai até 100",true);return}
+  try{await DB.salvarCupom({...c,valor:v,ativo:it.querySelector("input[data-a=ativo]").checked});toast(`Cupom ${c.codigo} salvo`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
 $("cLista").addEventListener("change",async e=>{const t=e.target;if(t.dataset.a!=="ativo")return;const it=t.closest(".ritem");const c=cupons.find(x=>String(x.id)===it.dataset.id);
   try{await DB.salvarCupom({...c,ativo:t.checked});toast(t.checked?`Cupom ${c.codigo} ligado`:`Cupom ${c.codigo} desligado`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
 async function carregarCupons(){cupons=await DB.cupons();listaCupons()}
