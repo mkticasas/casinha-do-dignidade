@@ -188,6 +188,25 @@ input:focus,select:focus{border-color:var(--yellow);outline:none}
 .note b{color:var(--yellow);font-weight:600}
 .cupom-bar{background:var(--yellow);color:var(--paper-ink);font:800 14px var(--body);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;transform:rotate(-.6deg);box-shadow:4px 4px 0 var(--grey)}
 .cupom-bar a{color:inherit;font:400 16px var(--marker);text-decoration:underline}
+.scal{background:var(--wall2);border:2px solid #3A3832;padding:12px;display:grid;gap:8px;max-width:460px}
+.scal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.scal-head b{font:400 24px/1 var(--display);text-transform:uppercase}
+.scal-head button{width:42px;height:42px;border:2px solid var(--chalk);background:transparent;color:var(--chalk);font:800 20px var(--body);cursor:pointer}
+.scal-head button:disabled{opacity:.25;cursor:default}
+.scal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.scal-grid .dw{font:800 11px var(--body);text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:2px}
+.scal-grid button{aspect-ratio:1;max-width:100%;border:1px solid #3A3832;background:transparent;color:var(--chalk);font:700 15px var(--body);cursor:pointer;padding:0;font-variant-numeric:tabular-nums}
+.scal-grid button:hover:not(:disabled){border-color:var(--yellow)}
+.scal-grid button:disabled{cursor:not-allowed}
+.scal-grid button.passado{opacity:.28}
+.scal-grid button.ocup{background:repeating-linear-gradient(-45deg,#3A3832 0 5px,transparent 5px 10px);color:var(--muted);text-decoration:line-through}
+.scal-grid button.sel{background:rgba(31,174,91,.3);border-color:var(--green)}
+.scal-grid button.sel-ini,.scal-grid button.sel-fim{background:var(--green);border-color:var(--green);color:#fff}
+.scal-leg{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.scal-leg .lg::before{content:"";display:inline-block;width:13px;height:13px;margin-right:6px;vertical-align:-2px}
+.scal-leg .lg.s::before{background:var(--green)}
+.scal-leg .lg.o::before{background:repeating-linear-gradient(-45deg,#77736a 0 3px,transparent 3px 6px);border:1px solid #77736a}
+.scal-msg{color:var(--yellow)}
 .cupom-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
 .cupom-row .btn{padding:13px 18px;box-shadow:3px 3px 0 var(--chalk)}
 #cupom{text-transform:uppercase}
@@ -525,10 +544,17 @@ footer{padding-block:36px 48px;margin-top:40px;border-top:2px dashed #4A4740;dis
       <form class="form" id="f" novalidate>
         <fieldset class="blk">
           <legend>Datas e pessoas</legend>
-          <label class="umdia" for="umdia"><input type="checkbox" id="umdia" checked><span>Só um dia</span></label>
-          <div class="row">
-            <label class="f" for="data"><span id="lblData">Data da festa</span><input type="date" id="data" required></label>
-            <label class="f" for="dataSaida" id="boxSaida" hidden>Saída<input type="date" id="dataSaida"></label>
+          <p class="note">Toque no dia da festa. Mais de um dia? Toque também no dia da saída.</p>
+          <div class="scal" id="scal">
+            <div class="scal-head"><button type="button" id="scalPrev" aria-label="Mês anterior">‹</button><b id="scalMes"></b><button type="button" id="scalNext" aria-label="Próximo mês">›</button></div>
+            <div class="scal-grid" id="scalGrid"></div>
+            <div class="scal-leg"><span class="lg s">sua data</span><span class="lg o">já reservado</span></div>
+          </div>
+          <p class="note scal-msg" id="scalMsg" hidden></p>
+          <div class="datas-nativas" hidden>
+            <label class="umdia" for="umdia"><input type="checkbox" id="umdia" checked><span>Só um dia</span></label>
+            <label class="f" for="data"><span id="lblData">Data da festa</span><input type="date" id="data"></label>
+            <label class="f" for="dataSaida" id="boxSaida">Saída<input type="date" id="dataSaida"></label>
           </div>
           <label class="f" for="pessoas">Pessoas (até 40)<input type="number" id="pessoas" min="1" max="40" value="20" inputmode="numeric"></label>
           <p class="note" id="diaInfo"></p>
@@ -658,7 +684,7 @@ for(let n=2;n<=18;n++) pag.insertAdjacentHTML("beforeend",`<option value="${n}">
 
 (function(){const d=new Date();d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
   const iso=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
-  $("data").value=iso(d);$("data").min=iso(new Date());$("dataSaida").value=iso(d);$("dataSaida").min=iso(new Date());})();
+  $("data").min=iso(new Date());$("dataSaida").min=iso(new Date());})();
 const isoD=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
 function syncSaida(){
   const um=$("umdia").checked,a=$("data").value;
@@ -669,6 +695,35 @@ function syncSaida(){
   if(!$("dataSaida").value||$("dataSaida").value<=a){const d=new Date(a+"T12:00:00");d.setDate(d.getDate()+1);$("dataSaida").value=isoD(d);}
 }
 $("data").addEventListener("change",()=>{syncSaida();calc();});
+/* ---- calendário do orçamento: dias reservados riscados e sem clique ---- */
+let scalRef=new Date();scalRef.setDate(1);let scalAberta=false;
+const MES_S=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const ocupado=iso=>OCUPADAS.some(o=>iso>=o.entrada&&iso<=o.saida);
+function scalMsg(t){$("scalMsg").hidden=!t;$("scalMsg").textContent=t||"";}
+function desenharScal(){
+  const y=scalRef.getFullYear(),m=scalRef.getMonth(),hoje=isoD(new Date());
+  $("scalMes").textContent=`${MES_S[m]} ${y}`;
+  const agora=new Date();$("scalPrev").disabled=(y<agora.getFullYear())||(y===agora.getFullYear()&&m<=agora.getMonth());
+  const g=$("scalGrid");g.innerHTML=["D","S","T","Q","Q","S","S"].map(d=>`<span class="dw">${d}</span>`).join("");
+  for(let i=0,pad=new Date(y,m,1).getDay();i<pad;i++)g.insertAdjacentHTML("beforeend","<span></span>");
+  const sa=$("data").value,sb=$("umdia").checked?sa:($("dataSaida").value||sa);
+  for(let d=1,n=new Date(y,m+1,0).getDate();d<=n;d++){
+    const iso=isoD(new Date(y,m,d,12)),pass=iso<hoje,oc=!pass&&ocupado(iso);
+    const sel=sa&&iso>=sa&&iso<=sb?(" sel"+(iso===sa?" sel-ini":"")+(iso===sb?" sel-fim":"")):"";
+    g.insertAdjacentHTML("beforeend",`<button type="button" data-d="${iso}" class="${pass?"passado":""}${oc?" ocup":""}${sel}" ${pass||oc?"disabled":""} aria-label="${d} de ${MES_S[m]}${oc?", já reservado":""}${sel?", selecionado":""}">${d}</button>`);
+  }
+}
+$("scalGrid").addEventListener("click",e=>{const b=e.target.closest("button[data-d]");if(!b||b.disabled)return;
+  const d=b.dataset.d,ini=$("data").value;scalMsg("");
+  if(scalAberta&&ini&&d>=ini){
+    for(let x=new Date(ini+"T12:00");isoD(x)<=d;x.setDate(x.getDate()+1)){if(ocupado(isoD(x))){scalMsg(`O dia ${isoD(x).split("-").reverse().slice(0,2).join("/")} já está reservado. Escolha um período sem ele.`);return}}
+    $("dataSaida").value=d;scalAberta=false;
+  } else {$("data").value=d;$("dataSaida").value=d;scalAberta=true;}
+  $("umdia").checked=$("data").value===$("dataSaida").value;
+  desenharScal();calc();});
+$("scalPrev").onclick=()=>{scalRef.setMonth(scalRef.getMonth()-1);desenharScal()};
+$("scalNext").onclick=()=>{scalRef.setMonth(scalRef.getMonth()+1);desenharScal()};
+desenharScal();
 $("umdia").addEventListener("change",()=>{syncSaida();calc();});
 
 const DIA=["dom","seg","ter","qua","qui","sex","sáb"];
@@ -704,7 +759,7 @@ function calc(){
   const pessoas=Math.max(0,+$("pessoas").value||0);
   mostrarOcupadas();
   const per=periodo(); const d=per&&!per.erro?per:null;
-  $("diaInfo").innerHTML=!per?"Escolha a entrada pra ver o valor.":per.erro?`<b>${per.erro[0].toUpperCase()+per.erro.slice(1)}.</b>`:
+  $("diaInfo").innerHTML=!per?"Escolha o dia no calendário pra ver o valor.":per.erro?`<b>${per.erro[0].toUpperCase()+per.erro.slice(1)}.</b>`:
     (d.n===1?`1 diária (${DIA_LONGO[d.dwIn]}): <span class="v">${brl(d.total)}</span>`
             :`${d.n} diárias: ${d.dias.map(x=>`${DIA[x.dw]} ${brl(x.valor).replace(",00","")}`).join(" + ")} = <span class="v">${brl(d.total)}</span>`)
     +` · seg–qui R$ 450 · sex e dom R$ 650 · sáb R$ 850`;
@@ -734,7 +789,7 @@ function calc(){
   tween(total);
   $("parc").textContent=parcTxt;
 
-  const errs=[];if(!per)errs.push("escolha a entrada");else if(per.erro)errs.push(per.erro);if(!pessoas)errs.push("informe quantas pessoas");if(pessoas>40)errs.push("o máximo é 40 pessoas");
+  const errs=[];if(!per)errs.push("escolha o dia no calendário");else if(per.erro)errs.push(per.erro);if(!pessoas)errs.push("informe quantas pessoas");if(pessoas>40)errs.push("o máximo é 40 pessoas");
   $("err").hidden=!errs.length;$("err").textContent=errs.length?"Pra mandar: "+errs.join(" e ")+".":"";
   $("send").setAttribute("aria-disabled",errs.length?"true":"false");
 
@@ -799,7 +854,10 @@ async function carregarOcupadas(){
   if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return;
   try{
     const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/casinha_datas_ocupadas",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"});
-    if(!r.ok) return; OCUPADAS=await r.json(); calc();
+    if(!r.ok) return; OCUPADAS=await r.json();
+    const a=$("data").value,b=$("umdia").checked?a:($("dataSaida").value||a);
+    if(a&&OCUPADAS.some(o=>!(b<o.entrada||a>o.saida))){$("data").value="";$("dataSaida").value="";$("umdia").checked=true;scalAberta=false;scalMsg("A data que você tinha escolhido acabou de ser reservada. Escolha outra.");}
+    desenharScal(); calc();
   }catch(e){}
 }
 function mostrarOcupadas(){
@@ -840,6 +898,8 @@ $("cupom").addEventListener("input",()=>{if(CUPOM&&$("cupom").value.trim().toUpp
 calc();
 carregarPrecos();
 carregarOcupadas();
+setInterval(carregarOcupadas,30000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)carregarOcupadas()});
 
 /* ---- agendar visita ---- */
 (function(){
