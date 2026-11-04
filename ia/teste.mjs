@@ -3,7 +3,7 @@
 // Simula o banco em memória e uma IA "roteirizada" que chama as ferramentas
 // na mesma ordem que a atendente real chamaria.
 import assert from "node:assert/strict";
-import { responder, executarFerramenta, montarMensagens } from "./worker.js";
+import { responder, executarFerramenta, montarMensagens, lerMensagemSite } from "./worker.js";
 import { calcular } from "./precos.js";
 
 const AGORA = new Date("2026-11-04T15:00:00Z");
@@ -140,6 +140,35 @@ await t("histórico nunca começa no meio de uma ferramenta", async () => {
     { papel: "user", conteudo: "oi" }, { papel: "humano", conteudo: "aqui é o Lucas" }, { papel: "assistant", conteudo: "e aí" },
   ]);
   assert.equal(m[0].role, "user"); assert.equal(m[0].content[0].text, "oi"); assert.equal(m.length, 2); assert.equal(m[1].content.length, 2);
+});
+
+const MSG_SITE = `Salve! Quero fechar a *Casinha do Dignidade*.
+
+*Nome:* Ana Souza
+*Data:* 14/11 (sáb)
+*Pessoas:* 20
+*Pacote:* Brasa
+*Cupom:* CRISDOICASAS
+*Carnes:* 2 peças de Picanha, 3 kg de Linguiça toscana, 1 pacote de Fígado
+
+*Total:* R$ 1.441,15
+*Pagamento:* Pix à vista`;
+await t("lê a mensagem pronta do site", async () => {
+  const d = lerMensagemSite(MSG_SITE, "2026-11-04", [{ slug: "picanha", nome: "Picanha" }, { slug: "lingui", nome: "Linguiça toscana" }]);
+  assert.deepEqual([d.nome, d.entrada, d.pessoas, d.pacote, d.cupom, d.pagamento], ["Ana Souza", "2026-11-14", 20, "brasa", "CRISDOICASAS", "pix"]);
+  assert.deepEqual(d.carnes, [{ slug: "picanha", qtd: 2 }, { slug: "lingui", qtd: 3 }]);
+  assert.deepEqual(d.carnes_nao_encontradas, ["Fígado"]);
+  const v = lerMensagemSite("Salve! Quero fechar a *Casinha do Dignidade*.\n*Entrada:* 31/12 (qui)\n*Saída:* 02/01 (sáb)\n*Pacote:* Dignidade Gold\n*Pagamento:* 12x de R$ 436,75 no cartão", "2026-11-04");
+  assert.deepEqual([v.entrada, v.saida, v.pacote, v.pagamento], ["2026-12-31", "2027-01-02", "gold", "cartão 12x"]);
+  assert.equal(lerMensagemSite("oi, tem data dia 14?", "2026-11-04"), null);
+});
+await t("mensagem do site chega pra IA com os dados prontos", async () => {
+  const db = bancoFake();
+  const llm = iaRoteiro([{ texto: "Salve, Ana! Recebi seu orçamento. Posso gerar o Pix?" }]);
+  await responder({ waId: "s1", texto: MSG_SITE, msgId: "s1" }, { db, llm, now: () => AGORA, enviar: async () => {}, alertar: async () => {} });
+  const enviado = llm.vistos[0].messages[0].content[0].text;
+  assert.match(enviado, /DADOS DO ORÇAMENTO DO SITE/); assert.match(enviado, /entrada: 2026-11-14/); assert.match(enviado, /"slug":"picanha"/);
+  assert.match(llm.vistos[0].system, /QUANDO O CLIENTE VEM DO SITE/);
 });
 
 console.log(`\n${ok} testes passaram`);

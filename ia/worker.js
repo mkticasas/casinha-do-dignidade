@@ -183,9 +183,57 @@ export function montarMensagens(hist) {
 }
 const textoDe = (content) => blocos(content).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
 
+// ------------------------------------------------- mensagem pronta que vem do site
+// O site manda: "Salve! Quero fechar a *Casinha do Dignidade*." + *Data:*/*Entrada:*, *Pessoas:*, *Pacote:*...
+// Aqui viram dados prontos (datas em ISO com o ano certo, pacote e carnes no código interno)
+// pra IA não perguntar de novo o que o cliente já escolheu.
+const PACOTE_NOME = { "casa": "casa", "brasa": "brasa", "dignidade gold": "gold", "gold": "gold" };
+export function lerMensagemSite(texto, hoje, tabelaCarnes = []) {
+  if (!/Quero fechar a \*?Casinha do Dignidade/i.test(texto || "")) return null;
+  const campo = (rot) => { const m = texto.match(new RegExp(`\\*${rot}:\\*\\s*([^\\n]+)`, "i")); return m ? m[1].trim() : null; };
+  const iso = (ddmm) => {
+    const m = /(\d{1,2})\/(\d{1,2})/.exec(ddmm || ""); if (!m) return null;
+    let y = +hoje.slice(0, 4); const mmdd = `${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    if (`${y}-${mmdd}` < hoje) y++;            // 05/01 em novembro = ano que vem
+    return `${y}-${mmdd}`;
+  };
+  const entrada = iso(campo("Data") || campo("Entrada"));
+  const saida = iso(campo("Saída")) || entrada;
+  const pac = (campo("Pacote") || "").toLowerCase();
+  const cupom = campo("Cupom");
+  const carnesTxt = campo("Carnes") || "";
+  const carnes = [], carnesNaoAchei = [];
+  if (!/sem encomenda/i.test(carnesTxt)) {
+    for (const parte of carnesTxt.split(",")) {
+      const m = /^\s*(\d+)\s+\S+\s+de\s+(.+?)\s*$/.exec(parte); if (!m) continue;
+      const nome = m[2].toLowerCase();
+      const t = tabelaCarnes.find((c) => String(c.nome).toLowerCase() === nome);
+      if (t) carnes.push({ slug: t.slug, qtd: +m[1] }); else carnesNaoAchei.push(m[2]);
+    }
+  }
+  const pagTxt = campo("Pagamento") || "";
+  const parc = /(\d+)x/.exec(pagTxt);
+  return {
+    nome: campo("Nome"), entrada, saida, pessoas: +(campo("Pessoas") || 0) || null,
+    pacote: PACOTE_NOME[pac] || null, cupom: cupom || null, carnes, carnes_nao_encontradas: carnesNaoAchei,
+    pagamento: /pix/i.test(pagTxt) ? "pix" : parc ? (+parc[1] === 1 ? "cartão 1x" : `cartão ${parc[1]}x`) : null,
+    total_no_site: campo("Total"),
+  };
+}
+function anotarSite(texto, d) {
+  const linhas = Object.entries(d).filter(([, v]) => v !== null && !(Array.isArray(v) && !v.length))
+    .map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : v}`);
+  return `${texto}\n\n[DADOS DO ORÇAMENTO DO SITE, já escolhidos pelo cliente, não pergunte de novo]\n${linhas.join("\n")}`;
+}
+
 export async function responder({ waId, texto, nome, msgId }, deps) {
   const { db } = deps;
   await db.conversa(waId, nome);
+  const hojeISO = deps.now().toISOString().slice(0, 10);
+  if (/Quero fechar a \*?Casinha do Dignidade/i.test(texto || "")) {
+    const d = lerMensagemSite(texto, hojeISO, await db.carnes().catch(() => []));
+    if (d) texto = anotarSite(texto, d);
+  }
   const nova = await db.salvarMsg(waId, "user", texto, msgId);
   if (!nova) return null;                                   // mensagem repetida do WhatsApp
   const conv = await db.getConversa(waId);
