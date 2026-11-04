@@ -97,6 +97,8 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .pill.pre{background:transparent;color:var(--yellow);border:2px dashed var(--yellow)}
 .ritem .acoes{grid-column:1/-1}
 @media (max-width:640px){.rgrid{grid-template-columns:1fr 1fr}}
+.conta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.quem{font-size:12px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--green);color:#fff;font:800 14px var(--body);padding:12px 18px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .25s;z-index:20}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .toast.err{background:var(--red)}
@@ -124,7 +126,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
   <div id="app">
     <header class="bar">
       <h1>Casinha do Dignidade<small>painel de preços</small></h1>
-      <span class="mode" id="mode">Modo demonstração</span>
+      <div class="conta"><span class="mode" id="mode">Modo demonstração</span><span class="quem" id="quem" hidden></span><button class="btn sm" type="button" id="sair" hidden>Sair</button></div>
     </header>
 
     <section aria-labelledby="t-agenda">
@@ -213,7 +215,7 @@ const SEED=[
 
 /* ---- camada de dados: navegador (demo) ou Supabase ---- */
 const LIVE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
-let token=null;
+let token=null,refreshTok=null,userEmail="";
 const store={
   get(k,d){try{const v=localStorage.getItem("casinha_"+k);return v?JSON.parse(v):d}catch(e){return d}},
   set(k,v){try{localStorage.setItem("casinha_"+k,JSON.stringify(v))}catch(e){}}
@@ -263,10 +265,28 @@ const DB={
   async salvarConfig(c){ if(!LIVE){store.set("config",c);return}
     await api("casinha_config?id=eq.1",{method:"PATCH",body:JSON.stringify(c)})}
 };
+/* sessão: fica salva neste aparelho e se renova sozinha até alguém tocar em Sair */
+function salvarSessao(j){
+  token=j.access_token;refreshTok=j.refresh_token;userEmail=(j.user&&j.user.email)||userEmail;
+  try{localStorage.setItem("casinha_sessao",JSON.stringify({refresh:refreshTok,email:userEmail}))}catch(e){}
+  clearTimeout(window._renova);window._renova=setTimeout(renovar,Math.max(60,(j.expires_in||3600)-120)*1000);
+}
+function limparSessao(){token=null;refreshTok=null;userEmail="";clearTimeout(window._renova);try{localStorage.removeItem("casinha_sessao")}catch(e){}}
 async function login(email,pass){
   const r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password:pass})});
   if(!r.ok) throw new Error("E-mail ou senha não conferem.");
-  token=(await r.json()).access_token;
+  salvarSessao(await r.json());
+}
+async function renovar(){
+  if(!refreshTok) return false;
+  try{const r=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:refreshTok})});
+    if(!r.ok){limparSessao();return false}
+    salvarSessao(await r.json());return true;
+  }catch(e){return !!token}
+}
+async function sair(){
+  try{if(token)await fetch(SUPABASE_URL+"/auth/v1/logout",{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+token}})}catch(e){}
+  limparSessao();location.reload();
 }
 
 /* ---- tela ---- */
@@ -401,9 +421,24 @@ $("cLista").addEventListener("change",async e=>{const t=e.target;if(t.dataset.a!
   try{await DB.salvarCupom({...c,ativo:t.checked});toast(t.checked?`Cupom ${c.codigo} ligado`:`Cupom ${c.codigo} desligado`);await carregarCupons()}catch(err){toast("Não salvou: "+err.message,true)}});
 async function carregarCupons(){cupons=await DB.cupons();listaCupons()}
 
+async function abrirPainel(){
+  await carregar();await carregarAgenda();await carregarCupons();
+  $("login").hidden=true;$("app").hidden=false;
+  $("quem").textContent=userEmail;$("quem").hidden=!userEmail;$("sair").hidden=false;
+}
 async function iniciar(){
-  if(LIVE){$("mode").textContent="Conectado";$("mode").classList.add("live");$("app").hidden=true;$("login").hidden=false;
-    $("lBtn").onclick=async()=>{try{await login($("lEmail").value,$("lPass").value);await carregar();await carregarAgenda();await carregarCupons();$("login").hidden=true;$("app").hidden=false}catch(e){$("lErr").hidden=false;$("lErr").textContent=/relation|does not exist|42P01|PGRST/.test(e.message)?"Login ok, mas as tabelas ainda não existem no Supabase. Rode o SQL casinha_precos.sql.":e.message}};
+  if(LIVE){$("mode").textContent="Conectado";$("mode").classList.add("live");$("app").hidden=true;$("login").hidden=true;
+    $("sair").onclick=sair;
+    const entrar=async()=>{$("lErr").hidden=true;$("lBtn").disabled=true;
+      try{await login($("lEmail").value.trim(),$("lPass").value);await abrirPainel()}
+      catch(e){$("lErr").hidden=false;$("lErr").textContent=/relation|does not exist|42P01/.test(e.message)?"Login ok, mas as tabelas ainda não existem no Supabase. Rode o SQL casinha_precos.sql.":e.message}
+      $("lBtn").disabled=false};
+    $("lBtn").onclick=entrar;$("lPass").addEventListener("keydown",e=>{if(e.key==="Enter")entrar()});
+    // volta logado se já entrou neste aparelho
+    let s=null;try{s=JSON.parse(localStorage.getItem("casinha_sessao")||"null")}catch(e){}
+    if(s&&s.refresh){refreshTok=s.refresh;userEmail=s.email||"";
+      if(await renovar()){try{await abrirPainel();return}catch(e){toast("Não carregou: "+e.message,true)}}}
+    $("login").hidden=false;
   } else {await carregar();await carregarAgenda();await carregarCupons();}
 }
 iniciar();
