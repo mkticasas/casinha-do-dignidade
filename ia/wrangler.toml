@@ -1,0 +1,25 @@
+name = "casinha-atendente"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# a cada 10 min cancela pré-reserva vencida (24 h sem Pix) e libera a data
+[triggers]
+crons = ["*/10 * * * *"]
+
+[vars]
+SUPABASE_URL = "https://mqdhavyaeujufhlqdlfg.supabase.co"
+MODEL = "claude-haiku-5-5"
+PIX_PAYER_EMAIL = "reservas@casinhadodignidade.com.br"
+# PUBLIC_URL = "https://casinha-atendente.SEU-USUARIO.workers.dev"   (preencher depois do 1º deploy)
+
+# Segredos (NUNCA no arquivo; cadastrar com `npx wrangler secret put NOME`):
+#   SUPABASE_SERVICE_KEY   Supabase > Project Settings > API > service_role
+#   ANTHROPIC_API_KEY      console.anthropic.com > API Keys
+#   ADMIN_KEY              senha que você inventa, usada no /simular
+#   WA_TOKEN               Meta > WhatsApp > token permanente (usuário do sistema)
+#   WA_PHONE_ID            Meta > WhatsApp > Configuração da API > ID do número
+#   WA_VERIFY_TOKEN        texto que você inventa e repete no webhook da Meta
+#   WA_APP_SECRET          Meta > Configurações do app > Básico > Chave secreta
+#   MP_ACCESS_TOKEN        Mercado Pago > Suas integrações > Credenciais de produção
+#   TELEGRAM_BOT_TOKEN     (opcional) @BotFather
+#   TELEGRAM_CHAT_ID       (opcional) id do grupo/conversa que recebe os avisos
